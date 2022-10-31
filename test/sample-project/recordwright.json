@@ -1,0 +1,7 @@
+{
+    "function": "./recordwright-func.js",
+    "locator": "./recordwright-locator.js",
+    "test": "./script",
+    "config": "./playwright.config.js",
+    "pic": "./componentPic"
+}
