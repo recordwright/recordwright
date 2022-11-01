@@ -1,7 +1,7 @@
 
 const { test, Page, Frame } = require('@playwright/test')
-const ElementSelector = require('../class/ElementSelector')
-const BluestoneFunc = require('../class/BaseRecordWrightFunction')
+const ElementSelector = require('../../../rwLibrary/class/ElementSelector')
+const RecordwrightFunc = require('../../../rwLibrary/class/RecordwrightFunc')
 /**
  * Click UI Element at against coordaination
  * @param {Object} input
@@ -10,16 +10,23 @@ const BluestoneFunc = require('../class/BaseRecordWrightFunction')
  * @param {Number} input.x x-coorindation offset in terms of percentage. Scale of 1
  * @param {Number} input.y x-coorindation offset in terms of percentage. Scale of 1
  */
-async function click(input) {
-    class mainClass extends BluestoneFunc {
-        constructor() {
-            super()
-            this.locators = [{ locator: ['invalid_locator'] }]
-            this.log = `Click in ${input.element.displayName}`
+exports.click = async function (input) {
+    class mainClass extends RecordwrightFunc {
+        async getLocator() {
+            return [{ locator: 'invalid_locator' }]
         }
-
+        async getLog() {
+            return `Click in ${input.element.displayName}`
+        }
+        /**
+         * Perform functions
+         * @returns 
+         */
         async func() {
             try {
+                /**
+                 * click on element based on the size
+                 */
                 let locator = await input.frame.locator(input.element.locator)
                 let rect = await locator.boundingBox()
                 let x = rect.width * input.x
@@ -33,9 +40,9 @@ async function click(input) {
 
     }
 
-    let result = await BluestoneFunc.entry(mainClass, input)
+    let result = await RecordwrightFunc.entry(mainClass, input)
     return result
 
 }
 
-module.exports = click
+

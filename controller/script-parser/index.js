@@ -7,7 +7,6 @@ const doctrine = require("doctrine");
 const path = require('path')
 const FunctionAST = require('./class/Function')
 const BsFunc = require('./class/BsFunc')
-const extractCommentForCustomziedFunctionClass = require('./lib/extractCommentForCustomizedFunctionClass')
 const cliProgress = require('cli-progress');
 class AST {
     /**
@@ -100,20 +99,23 @@ class AST {
         b1.start(functionKeys.length, 0, {
             speed: "N/A"
         })
-        let funcStaicInfoList = await this.__getBsFuncInfoList(ast, functionKeys)
+        let funcStaicInfoList = await this.__getRwFuncInfoList(funcPath, ast, functionKeys)
 
         for (let i = 0; i < functionKeys.length; i++) {
             b1.increment()
             let funcName = functionKeys[i]
-            //extract dynamic function info
-            let mainFunc = bsFunction[funcName].func
-            let locators = bsFunction[funcName].locators
+            //Import recordwright-func.js and get current function name and locator
+            let mainFunc = bsFunction[funcName]
+
+            let locators = await bsFunction[funcName]({ getLocator: true })
+
+
 
             //extract static function info for current call
             let funcStaicInfo = funcStaicInfoList[i]
             //Based on the static library and method name, correlate dynamic info
             let methodDetail = requireInfo.repo.find(info => {
-                return info.libraryName == funcStaicInfo.libraryName && info.methodName == funcStaicInfo.methodName
+                return info.methodName == funcStaicInfo.methodName
             })
 
 
@@ -129,7 +131,7 @@ class AST {
     }
 
     /**
-     * Get all require inforamtion
+     * From requirement inforamtion, get comments from each function files
      * @param {acorn.Node} ast 
      * @param {string} funcPath
      * @returns {JsDocSummary}
@@ -161,19 +163,17 @@ class AST {
 
             //hanlde legacy function definition pattern
             let commentObj = extract(funcJs, {})
-            let newCommentFromClass = await extractCommentForCustomziedFunctionClass(funcJs)
-            commentObj = [...newCommentFromClass, ...commentObj]
-            commentObj.forEach(comment => {
+            for (let comment of commentObj) {
                 //only worry about the comment for the export function
                 if (comment.type != 'BlockComment' || comment.code.context == null || comment.code.context.receiver != 'exports') {
-                    return
+                    continue
                 }
                 let methodName = comment.code.context.name
                 let standardizedCommentStr = comment.value.split("\r\n").join('\n')
                 let commentAST = doctrine.parse(standardizedCommentStr, { unwrap: true })
 
                 //rearrange the parameter string so that it will align with the order
-                commentAST = this.__rearrangeJsDocSequence(comment.code.value, commentAST)
+                commentAST = this.__extractKeyInputFromObject(comment.code.value, commentAST)
 
 
                 let methodDescription = commentAST.description
@@ -181,7 +181,7 @@ class AST {
                 let jsDocEntry = new JsDocEntry(filePath, libraryName, methodName, methodDescription, commentAST.tags, commentAST['returns'])
                 jsDocSummary.add(jsDocEntry)
 
-            })
+            }
 
 
         }
@@ -192,61 +192,23 @@ class AST {
     }
 
     /**
-     * Based on the bluestone function static info, return list of library name and method name
+     * Based on playwright-func.js, returns a list of function that is being exported
+     * @param {string} funcPath
      * @param {*} ast 
-     * @param {string[]} funcNameList 
      * @returns {BsFunc[]}
      */
-    async __getBsFuncInfoList(ast, funcNameList) {
+    async __getRwFuncInfoList(funcPath, ast) {
         //extract static function info
+        //it seems like there is only 1 object expression. Use that as an indicator
         let currentNodeList = walk(ast, (node, ancestors) => {
-            let parentAncestorIndex = ancestors.length - 2
-            return node.type == 'Identifier' && funcNameList.includes(node.name) && ancestors[parentAncestorIndex].type == 'Property'
-        }, (node, ancestors) => {
-            try {
-                if (ancestors[0].type != 'ExpressionStatement') return true
-                if (ancestors[1].type != 'AssignmentExpression') return true
-                if (ancestors[2].type != 'ObjectExpression') return true
-                if (ancestors[3].type != 'Property') return true
-                if (ancestors[4].type != 'Identifier') return true
-                if (ancestors.length > 6) return true
-            } catch (error) {
-
-            }
-            return false
+            return node.type == 'ObjectExpression'
+        }, (node, ancestors, results) => {
+            return results.length > 0
         })
         let bsFuncList = []
-        for (const currentNode of currentNodeList) {
-            //get current function signature
-            //go to parent node
-            let parentNodeIndex = currentNode.ancestors.length - 2
-            let parentNode = currentNode.ancestors[parentNodeIndex]
-            //depends on definition type(class or loose object), choose right parser
-            let funcNode = null
-            let libraryName = ''
-            let methodName = ''
-            if (parentNode.value.properties) {
-                funcNode = parentNode.value.properties.find(item => { return item.key.name == 'func' })
-                libraryName = funcNode.value.object.name
-                methodName = funcNode.value.property.name
-            }
-            else if (parentNode.value.type == 'NewExpression') {
-                libraryName = parentNode.value.callee.object.name
-                methodName = parentNode.value.callee.property.name
-            }
-            else if (parentNode.value.type == 'ClassExpression') {
-                funcNode = parentNode.value.body.body.find(item => item.key.name == 'func')
-                libraryName = funcNode.value.object.name
-                methodName = funcNode.value.property.name
-            }
-            else if (parentNode.value.type == 'MemberExpression') {
-                libraryName = parentNode.value.object.name
-                methodName = currentNode.node.name
-
-            }
-
-
-            let bsFunc = new BsFunc(libraryName, methodName)
+        for (const currentNode of currentNodeList[0].node.properties) {
+            let methodName = currentNode.key.name
+            let bsFunc = new BsFunc(funcPath, methodName)
             bsFuncList.push(bsFunc)
         }
 
@@ -259,30 +221,33 @@ class AST {
      * @param {doctrine.Annotation} commentAST
      * @returns {doctrine.Annotation}
      */
-    __rearrangeJsDocSequence(funcSignature, commentAST) {
+    __extractKeyInputFromObject(funcSignature, commentAST) {
         let parameterStr = funcSignature.replace(/.*\(/g, '').replace(/\).*/g, '')
         let parameters = []
         //in case there is , within the function, this indicates that there is no parameter
         if (!funcSignature.includes('()')) {
             parameters = parameterStr.split(',')
         }
-        let reArrangedTag = []
-        let paramTags = commentAST.tags.filter(item => { return item.title == 'param' })
+        let keyInputVar = []
+
+        let paramTags = commentAST.tags.filter(item => { return item.title == 'param' && !item.name.includes('.') })
         //conduct parameter count check
         if (parameters.length != paramTags.length) {
             throw `number of elements from function: ${funcSignature} does not match number of params in jsDoc.`
         }
 
-        //rearrange the parameters
-        parameters.forEach(item => {
-            let tag = commentAST.tags.find(tag => { return tag.name == item.trim() })
-            reArrangedTag.push(tag)
-        })
+        //extract keys from input dictionary
+        for (let tag of commentAST.tags) {
+            //skip input object
+            if (tag.title == 'param' && !tag.name.includes('.')) continue
+            tag.name = tag.name.split('.')[1]
+            keyInputVar.push(tag)
+        }
 
         //extract returns type
         commentAST['returns'] = commentAST.tags.find(item => item.title == 'returns')
 
-        commentAST.tags = reArrangedTag
+        commentAST.tags = keyInputVar
         return commentAST
 
     }

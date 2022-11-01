@@ -1,6 +1,6 @@
 class BsFunc {
-    constructor(libraryName, methodName) {
-        this.libraryName = libraryName
+    constructor(funcPath, methodName) {
+        this.funcPath = funcPath
         this.methodName = methodName
     }
 }

@@ -1,5 +1,5 @@
 const Locator = require('../../locator/class/Locator')
-const ElementSelector = require('../../../ptLibrary/class/ElementSelector')
+const ElementSelector = require('../../../rwLibrary/class/ElementSelector')
 const Coder = require('../../coder/class/AstGenerator')
 const AstGenerator = require('../../coder/class/AstGenerator')
 class ArgumentNContext {
