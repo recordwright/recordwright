@@ -48,6 +48,11 @@ class AST {
         this.__funcRepo = this.__funcRepo.filter(item => item.name != name)
         this.__funcRepo.push(funcAst)
     }
+    /**
+     * Based on the function name, return function ast
+     * @param {string} name 
+     * @returns {FunctionAST}
+     */
     getFunction(name) {
         let func = this.__funcRepo.find(item => {
             return item.name.toUpperCase() == name.toUpperCase()
