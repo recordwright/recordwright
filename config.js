@@ -4,14 +4,17 @@ let config = {
     app: {
         port: process.env.port || 3600
     },
-    puppeteer: {
-        headless: false,
-        defaultViewport: null,
-        args: [
-            '--disable-web-security',
-            '--disable-features=IsolateOrigins,site-per-process',
-        ]
-
+    recordwright: {
+        name: 'chromium',
+        use: {
+            headless: false,
+            launchOptions: {
+                args: [
+                    '--disable-web-security',
+                    '--disable-features=IsolateOrigins,site-per-process',
+                ]
+            }
+        }
     },
     bluestoneJson: process.env.bluestonePath || path.join(__dirname, './test/sample-project/recordwright.json'),
     code: {
@@ -26,46 +29,6 @@ let config = {
         customLocatorEnginePath: path.join(__dirname, './public/javascript/customLocator.js'),
         dataPath: path.join(__dirname, './test/sample-project/data'),
         locatorAttributePreference: []
-    },
-    singlefile: {
-        removeHiddenElements: false,
-        removeUnusedStyles: false,
-        removeUnusedFonts: false,
-        progressBarEnabled: false,
-        userScriptEnabled: false,
-        removeFrames: false,
-        removeImports: false,
-        removeScripts: true,
-        compressHTML: false,
-        compressCSS: false,
-        loadDeferredImages: false,
-        loadDeferredImagesMaxIdleTime: 100,
-        loadDeferredImagesBlockCookies: false,
-        loadDeferredImagesBlockStorage: false,
-        loadDeferredImagesKeepZoomLevel: false,
-        filenameTemplate: "{page-title} ({date-locale} {time-locale}).html",
-        infobarTemplate: "",
-        includeInfobar: false,
-        filenameMaxLength: 192,
-        filenameReplacedCharacters: ["~", "+", "\\\\", "?", "%", "*", ":", "|", "\"", "<", ">", "\x00-\x1f", "\x7F"],
-        filenameReplacementCharacter: "_",
-        maxResourceSizeEnabled: false,
-        maxResourceSize: 10,
-        removeAudioSrc: false,
-        removeVideoSrc: false,
-        backgroundSave: false,
-        removeAlternativeFonts: false,
-        removeAlternativeMedias: false,
-        removeAlternativeImages: false,
-        groupDuplicateImages: false,
-        saveRawPage: false,
-        resolveFragmentIdentifierURLs: false,
-        userScriptEnabled: false,
-        saveFavicon: false,
-        includeBOM: false,
-        insertMetaCSP: false,
-        insertMetaNoIndex: false,
-        insertSingleFileComment: false
     },
     recording: {
         captureHtml: false
@@ -92,11 +55,10 @@ function configFunc() {
     //load puppeteer config6
 
     if (projectObj.config) {
-        let puppeteerConfigPath = path.join(projectFolder, projectObj.config)
-        config.puppeteer = require(puppeteerConfigPath).puppeteer
+        let recordwrightConfigPath = path.join(projectFolder, projectObj.config)
+        config.recordwright = require(recordwrightConfigPath).projects[0]
         //force headless mode to be false because bluestone need to display browser
-        if (config.puppeteer && config.puppeteer.headless == true)
-            config.puppeteer.headless = false
+        config.recordwright.use.headless = true
     }
 
     //load locator generator engine
