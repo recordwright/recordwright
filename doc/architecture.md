@@ -16,8 +16,8 @@
   * Active Function Tracker
 * Locator Control
   * Locator Generator
-  * Locator Parser
-  * Active Locator Tracker
+  * Locator Parser/tracker
+    * Active Locator Tracker
 * Browser Meta Control - Save meta inforamtion from current recorded screen
   * Browser Selection
   * Record Html

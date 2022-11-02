@@ -1,6 +1,6 @@
 const fs = require('fs').promises
 const acorn = require("acorn");
-const walk = require("./lib/walk")
+const walk = require("../common/walkAst")
 const extract = require('extract-comments')
 const { JsDocSummary, JsDocEntry } = require('./class/JsDocSummary')
 const doctrine = require("doctrine");

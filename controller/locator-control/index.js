@@ -1,13 +1,14 @@
-const Locator = require('./Locator')
+const Locator = require('./class/Locator')
 const fs = require('fs').promises
-const config = require('../../../config')
+const config = require('../../config')
 const path = require('path')
-const LocatorAstGen = require('./LocatorAstGen')
+const LocatorAstGen = require('./class/LocatorAstGen')
 const escodegen = require('escodegen')
-const Support = require('./Support')
+const unifyFileName = require('../common/unifyFileName')
 class LocatorManager {
     /**
-     * Create Locator Manager Class     * 
+     * Create Locator Manager Class     
+     * @param {string} locatorPath
      */
     constructor(locatorPath) {
 
@@ -98,41 +99,57 @@ class LocatorManager {
             }
 
             let potentialLocator = value['locator']
-            if (potentialLocator != null && Array.isArray(potentialLocator) && potentialLocator.length > 0) {
+            if (potentialLocator != null) {
 
-                let newLocator = new Locator(value['locator'], value['screenshot'], newPath, value.snapshot)
+                let newLocator = new Locator(value['locator'], value['screenshot'], newPath, [], value.snapshot)
                 this.__locatorLibrary.push(newLocator)
-                continue
-            }
 
-            this.__iterateThroughObject(value, newPath)
+            }
         }
     }
 
     /**
-     * Update current locator library based on the input value
+     * Update current locator library based on the input value. If it's a new locator, it will return locator. If it is update, it will return null
      * @param {string} locatorName 
-     * @param {string[]} locatorValue 
+     * @param {string} locatorValue 
      * @param {string} picPath 
      * @param {string[]} locatorSnapshot
+     * @param {string} locatorSnapshotPath
      * @returns {Locator} if new locator is created, return this locator 
      */
     async updateLocator(locatorName, locatorValue, picPath, locatorSnapshot) {
         let newLocator = null
         //copy picture into desinanated location
-        let newPicName = locatorName.replace(/\W/g, '_') + '.png'
+        let locatorFolder = path.dirname(config.code.locatorPath)
+        let newPicName = unifyFileName(locatorName) + '.png'
         let newPicPath = path.join(config.code.pictureFolder, newPicName)
+
+
         try {
             await fs.copyFile(picPath, newPicPath)
         } catch (error) {
-
+            // console.log(error)
         }
 
-
         //get relative path for the locator
-        let locatorFolder = path.dirname(config.code.locatorPath)
         let relativePicPath = path.relative(locatorFolder, newPicPath)
         relativePicPath = relativePicPath.replace(/\\/g, '/')
+
+        //update snapshot information in the disk
+        let newLocatorSnapshotName = unifyFileName(locatorName) + '.json'
+        let locatorSnapshotPath = path.join(config.code.locatorSnapshotFolder, newLocatorSnapshotName)
+        let relativeSnapshotPath = path.relative(locatorFolder, locatorSnapshotPath)
+        relativeSnapshotPath = relativeSnapshotPath.replace(/\\/g, '/') //update to linux format
+        if (locatorSnapshot != null && locatorSnapshot.length > 0) {
+            try {
+
+                let locatorSnapshotJson = JSON.stringify(locatorSnapshot)
+                await fs.writeFile(locatorSnapshotJson, locatorSnapshotPath)
+            } catch (error) {
+                // console.log(error)
+            }
+        }
+
         //add new locator into the library
         let targetLocator = this.locatorLibrary.find(item => { return item.path == locatorName })
         if (targetLocator == null) {
@@ -140,13 +157,13 @@ class LocatorManager {
             if (locatorSnapshot == null) {
                 locatorSnapshot = []
             }
-            targetLocator = new Locator(locatorValue, relativePicPath, locatorName, locatorSnapshot)
+            targetLocator = new Locator(locatorValue, relativePicPath, locatorName, locatorSnapshot, relativeSnapshotPath)
             this.locatorLibrary.push(targetLocator)
             newLocator = targetLocator
         }
 
         //check if update is required for the current locator. If so, update locator and screenshot path
-        if (targetLocator.Locator[0] != locatorValue[0] || targetLocator.screenshot == '' || targetLocator.screenshot == null) {
+        if (targetLocator.Locator != locatorValue || targetLocator.screenshot != relativePicPath || targetLocator.locatorSnapshot == locatorSnapshot) {
             targetLocator.Locator = locatorValue
             targetLocator.screenshot = relativePicPath
             targetLocator.locatorSnapshot = locatorSnapshot
@@ -163,7 +180,7 @@ class LocatorManager {
         //output locator informaiton
         let ast = LocatorAstGen.getModuleExportWrapper()
         this.locatorLibrary.forEach(item => {
-            let cleanedLocatorSnapshotName = Support.getValidFileName(item.path)
+            let cleanedLocatorSnapshotName = unifyFileName(item.path)
             let locatorAst = LocatorAstGen.getLocatorStructure(item.path, item.Locator[0], item.screenshot, item.locatorSnapshot, cleanedLocatorSnapshotName)
             ast.body[0].expression.right.properties.push(locatorAst)
             if (item.locatorSnapshot) {
@@ -182,7 +199,7 @@ class LocatorManager {
         for (let item of locatorSnapshotList) {
             //clean up unsupported name
             let cleanedLocatorDisplayName = item.path
-            cleanedLocatorDisplayName = Support.getValidFileName(cleanedLocatorDisplayName)
+            cleanedLocatorDisplayName = unifyFileName(cleanedLocatorDisplayName)
 
             //append file extension
             cleanedLocatorDisplayName += '.json'

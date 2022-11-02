@@ -1,4 +1,4 @@
-const AST = require('../../../controller/automation-parser/function-manager')
+const AST = require('../../../controller/function-control/function-parser')
 const path = require('path')
 const fs = require('fs')
 const acorn = require("acorn");
