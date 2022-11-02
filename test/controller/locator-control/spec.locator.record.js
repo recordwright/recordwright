@@ -38,13 +38,19 @@ describe('Locator Control', () => {
             assert.equal(activeLocators[0].Locator, locatorControl.__locatorLibrary[i].Locator)
         }
     })
-    it('should copy picture from temp folder to picture path and with relative folder to component path', async () => {
+    it('should copy picture and snapshot from temp folder to picture path and with relative folder to component path', async () => {
         let locatorPath = path.join(__dirname, '../../sample-project/recordwright-locator-1.js')
         let locatorControl = new LocatorControl(locatorPath)
         let originalPicPath = path.join(__dirname, './baseline/test.png')
         let componentPicPath = path.join(__dirname, '../../sample-project/componentPic/test.png')
+        let snapshotPath = path.join(__dirname, '../../sample-project/locator/test.json')
         try {
             fs.unlinkSync(componentPicPath)
+        } catch (error) {
+
+        }
+        try {
+            fs.unlinkSync(snapshotPath)
         } catch (error) {
 
         }
@@ -54,6 +60,12 @@ describe('Locator Control', () => {
             fs.unlinkSync(componentPicPath)
         } catch (error) {
             assert.fail('Picture is not copyed to component pic folder correctly')
+        }
+        try {
+            fs.accessSync(snapshotPath)
+            fs.unlinkSync(snapshotPath)
+        } catch (error) {
+            assert.fail('snapshot is not generated correctly')
         }
 
     }).timeout(10 * 1000)
@@ -70,6 +82,20 @@ describe('Locator Control', () => {
         assert.deepEqual(newLocator.locatorSnapshot, ['sample1', 'sample2'])
         assert.equal(newLocator.locatorSnapshotPath, 'locator/test.json')
     })
-    it('should update locator and return null')
+    it('should update locator and return null', async () => {
+        let locatorPath = path.join(__dirname, '../../sample-project/recordwright-locator-1.js')
+        let locatorControl = new LocatorControl(locatorPath)
+        let originalPicPath = path.join(__dirname, './baseline/test.png')
+        let newLocator = await locatorControl.updateLocator('get started', '/html', originalPicPath, ['sample1', 'sample2'], originalPicPath)
+        //new locator should be returened
+        assert.equal(newLocator, null)
+        newLocator = locatorControl.__locatorLibrary.find(item => item.path == 'get started')
+        assert.equal(locatorControl.__locatorLibrary.length, 2)
+        assert.equal(newLocator.path, 'get started')
+        assert.equal(newLocator.Locator, '/html')
+        assert.equal(newLocator.screenshot, 'componentPic/get started.png')
+        assert.deepEqual(newLocator.locatorSnapshot, ['sample1', 'sample2'])
+        assert.equal(newLocator.locatorSnapshotPath, 'locator/get started.json')
+    })
     it('should output locator correctly')
 })

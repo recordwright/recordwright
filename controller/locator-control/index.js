@@ -144,9 +144,9 @@ class LocatorManager {
             try {
 
                 let locatorSnapshotJson = JSON.stringify(locatorSnapshot)
-                await fs.writeFile(locatorSnapshotJson, locatorSnapshotPath)
+                await fs.writeFile(locatorSnapshotPath, locatorSnapshotJson)
             } catch (error) {
-                // console.log(error)
+                console.log(error)
             }
         }
 
@@ -163,9 +163,10 @@ class LocatorManager {
         }
 
         //check if update is required for the current locator. If so, update locator and screenshot path
-        if (targetLocator.Locator != locatorValue || targetLocator.screenshot != relativePicPath || targetLocator.locatorSnapshot == locatorSnapshot) {
+        if (targetLocator.Locator != locatorValue || targetLocator.screenshot != relativePicPath || targetLocator.locatorSnapshotPath != relativeSnapshotPath) {
             targetLocator.Locator = locatorValue
             targetLocator.screenshot = relativePicPath
+            targetLocator.locatorSnapshotPath = relativeSnapshotPath
             targetLocator.locatorSnapshot = locatorSnapshot
         }
         return JSON.parse(JSON.stringify(newLocator))
