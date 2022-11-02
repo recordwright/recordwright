@@ -182,7 +182,7 @@ class LocatorManager {
         let ast = LocatorAstGen.getModuleExportWrapper()
         this.locatorLibrary.forEach(item => {
             let cleanedLocatorSnapshotName = unifyFileName(item.path)
-            let locatorAst = LocatorAstGen.getLocatorStructure(item.path, item.Locator[0], item.screenshot, item.locatorSnapshot, cleanedLocatorSnapshotName)
+            let locatorAst = LocatorAstGen.getLocatorStructure(item.path, item.Locator, item.screenshot, item.locatorSnapshot, cleanedLocatorSnapshotName)
             ast.body[0].expression.right.properties.push(locatorAst)
             if (item.locatorSnapshot) {
                 locatorSnapshotList.push(item)
@@ -190,28 +190,6 @@ class LocatorManager {
         })
         let output = escodegen.generate(ast)
         await fs.writeFile(config.code.locatorPath, output)
-
-        //output locator snapshot
-        try {
-            await fs.access(config.code.locatorSnapshotFolder)
-        } catch (error) {
-            fs.mkdir(config.code.locatorSnapshotFolder)
-        }
-        for (let item of locatorSnapshotList) {
-            //clean up unsupported name
-            let cleanedLocatorDisplayName = item.path
-            cleanedLocatorDisplayName = unifyFileName(cleanedLocatorDisplayName)
-
-            //append file extension
-            cleanedLocatorDisplayName += '.json'
-            //output file into disk
-            let locatorSnapshotPath = path.join(config.code.locatorSnapshotFolder, cleanedLocatorDisplayName)
-            let outputStr = JSON.stringify(item.locatorSnapshot)
-            await fs.writeFile(locatorSnapshotPath, outputStr)
-        }
-
-        //initialize locator information
-        this.__initialize()
     }
     getLocatorIndexByName(locatorName) {
         return this.locatorLibrary.findIndex(item => item.path == locatorName)

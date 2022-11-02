@@ -71,13 +71,8 @@ class LocatorAstGen {
                             "name": "locator"
                         },
                         "value": {
-                            "type": "ArrayExpression",
-                            "elements": [
-                                {
-                                    "type": "Literal",
-                                    "value": locatorValue,
-                                }
-                            ]
+                            "type": "Literal",
+                            "value": locatorValue,
                         },
                         "kind": "init"
                     },
@@ -125,18 +120,8 @@ class LocatorAstGen {
                 "name": "snapshot"
             },
             "value": {
-                "type": "CallExpression",
-                "callee": {
-                    "type": "Identifier",
-                    "name": "require"
-                },
-                "arguments": [
-                    {
-                        "type": "Literal",
-                        "value": `./locator/${cleanedLocatorSnapshotName}.json`,
-                    }
-                ],
-                "optional": false
+                "type": "Literal",
+                "value": `./locator/${cleanedLocatorSnapshotName}.json`
             },
             "kind": "init"
         }

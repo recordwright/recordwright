@@ -1,11 +1,12 @@
 const LocatorControl = require('../../../controller/locator-control')
 const path = require('path')
 const assert = require('assert')
-const locatorInfo = require('../../sample-project/recordwright-locator-1')
+const locatorInfo = require('./baseline/recordwright-locator-priorchange.js')
 const fs = require('fs')
+const config = require('../../../config')
 describe('Locator Control', () => {
     it('should parse locator from recordwright-locator-1.js', async () => {
-        let locatorPath = path.join(__dirname, '../../sample-project/recordwright-locator-1.js')
+        let locatorPath = path.join(__dirname, './baseline/recordwright-locator-priorchange.js')
         let locatorControl = new LocatorControl(locatorPath)
         let locatorKeyList = Object.keys(locatorInfo)
         for (let i = 0; i < locatorKeyList.length; i++) {
@@ -19,7 +20,7 @@ describe('Locator Control', () => {
         }
     })
     it('should set reset rest of variable and set expected value correctly', async () => {
-        let locatorPath = path.join(__dirname, '../../sample-project/recordwright-locator-1.js')
+        let locatorPath = path.join(__dirname, './baseline/recordwright-locator-priorchange.js')
         let locatorControl = new LocatorControl(locatorPath)
         locatorControl.setActiveLocator([0])
         assert.equal(locatorControl.__locatorLibrary[0].selector, true)
@@ -29,7 +30,7 @@ describe('Locator Control', () => {
         assert.equal(locatorControl.__locatorLibrary[1].selector, true)
     })
     it('should get active selector correctly', async () => {
-        let locatorPath = path.join(__dirname, '../../sample-project/recordwright-locator-1.js')
+        let locatorPath = path.join(__dirname, './baseline/recordwright-locator-priorchange.js')
         let locatorControl = new LocatorControl(locatorPath)
         for (let i = 0; i < locatorControl.__locatorLibrary.length; i++) {
             locatorControl.setActiveLocator([i])
@@ -39,7 +40,7 @@ describe('Locator Control', () => {
         }
     })
     it('should copy picture and snapshot from temp folder to picture path and with relative folder to component path', async () => {
-        let locatorPath = path.join(__dirname, '../../sample-project/recordwright-locator-1.js')
+        let locatorPath = path.join(__dirname, './baseline/recordwright-locator-priorchange.js')
         let locatorControl = new LocatorControl(locatorPath)
         let originalPicPath = path.join(__dirname, './baseline/test.png')
         let componentPicPath = path.join(__dirname, '../../sample-project/componentPic/test.png')
@@ -70,7 +71,7 @@ describe('Locator Control', () => {
 
     }).timeout(10 * 1000)
     it('should add locator and return locator info', async () => {
-        let locatorPath = path.join(__dirname, '../../sample-project/recordwright-locator-1.js')
+        let locatorPath = path.join(__dirname, './baseline/recordwright-locator-priorchange.js')
         let locatorControl = new LocatorControl(locatorPath)
         let originalPicPath = path.join(__dirname, './baseline/test.png')
         let newLocator = await locatorControl.updateLocator('test', '/html', originalPicPath, ['sample1', 'sample2'], originalPicPath)
@@ -83,7 +84,7 @@ describe('Locator Control', () => {
         assert.equal(newLocator.locatorSnapshotPath, 'locator/test.json')
     })
     it('should update locator and return null', async () => {
-        let locatorPath = path.join(__dirname, '../../sample-project/recordwright-locator-1.js')
+        let locatorPath = path.join(__dirname, './baseline/recordwright-locator-priorchange.js')
         let locatorControl = new LocatorControl(locatorPath)
         let originalPicPath = path.join(__dirname, './baseline/test.png')
         let newLocator = await locatorControl.updateLocator('get started', '/html', originalPicPath, ['sample1', 'sample2'], originalPicPath)
@@ -97,5 +98,16 @@ describe('Locator Control', () => {
         assert.deepEqual(newLocator.locatorSnapshot, ['sample1', 'sample2'])
         assert.equal(newLocator.locatorSnapshotPath, 'locator/get started.json')
     })
-    it('should output locator correctly')
+    it('should output locator correctly', async () => {
+        let locatorPath = path.join(__dirname, './baseline/recordwright-locator-priorchange.js')
+        let locatorControl = new LocatorControl(locatorPath)
+        let originalPicPath = path.join(__dirname, './baseline/test.png')
+        await locatorControl.updateLocator('test', '/html', originalPicPath, ['sample1', 'sample2'], originalPicPath)
+        await locatorControl.outputLocatorToDisk()
+
+        let locatorOutput = fs.readFileSync(config.code.locatorPath)
+        let locatorBaselinePath = path.join(__dirname, './baseline/recordwright-locator-afterchange.js')
+        let locatorBaseline = fs.readFileSync(locatorBaselinePath)
+        assert.equal(locatorOutput.toString(), locatorBaseline.toString())
+    })
 })
