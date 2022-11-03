@@ -5,15 +5,16 @@ class RecordManager {
     constructor(io) {
         this.io = io
         this.locatorControl = new LocatorControl(config.code.locatorPath)
-        let funcDict = this._initFuncDict()
-        this.browserManager = new BrowserManager(config.recordwright.use, funcDict, io)
+        this.funcDict = this._initFuncDict()
+        this.browserManager = new BrowserManager(config.recordwright.use, this.funcDict, io)
     }
     async waitForInit() {
         await this.browserManager.waitForInit()
     }
     _initFuncDict() {
         return {
-            setActiveLocator: this.locatorControl.setActiveLocator
+            setActiveLocator: this.locatorControl.setActiveLocator,
+            getActiveSelectors: this.locatorControl.getActiveSelectors
         }
     }
 }

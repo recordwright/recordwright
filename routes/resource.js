@@ -10,6 +10,10 @@ router.get('/js/:dependency', async function (req, res, next) {
         await fs.access(filePath)
         let fileContent = await fs.readFile(filePath)
         let fileStr = fileContent.toString()
+        //update reference url according to the current url
+        let updatedUrl = `http://localhost:${config.app.port}`
+        fileStr = fileStr.split('http://localhost:3600').join(updatedUrl)
+
         res.type('.js')
         res.send(fileStr);
     } catch (error) {

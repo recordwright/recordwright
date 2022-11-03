@@ -1,6 +1,12 @@
 function getElementByXpath(xpath, source = document) {
     let result = []
-    let elements = document.evaluate(xpath, source)
+    let elements = null
+    try {
+        elements = document.evaluate(xpath, source)
+    } catch (error) {
+        console.log(error)
+    }
+
     while (true) {
         let node = elements.iterateNext()
         if (node == null) break
@@ -10,6 +16,7 @@ function getElementByXpath(xpath, source = document) {
 
 }
 export function getXPath(elm) {
+    if (elm == null) return ''
     let target = elm
     var allNodes = document.getElementsByTagName('*');
     let segs = []

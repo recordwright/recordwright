@@ -11,10 +11,10 @@ describe('Record Manager', () => {
         await recordwrightBackend.closeApp()
         this.timeout(60000)
     })
-    it('it should launch application correctly', async () => {
+    it('it should expose function correctly', async () => {
         let recordManager = new RecordManager({})
         await recordManager.browserManager.createBrowserContext()
         await recordManager.browserManager.activePage.goto('https://playwright.dev/')
         await new Promise(resolve => setTimeout(resolve, 99999999))
-    }).timeout(999999)
+    }).timeout(99999999)
 })

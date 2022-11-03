@@ -106,6 +106,7 @@ export class PotentialMatchManager {
      * @returns {number[]}
      */
     getPotentialMatchByTarget(target) {
+        if (target == null) return []
         let locatorEntry = this.getElement(this.currentPotentialMatchList, target)
         if (locatorEntry == null) return []
         return locatorEntry.potentialMatch

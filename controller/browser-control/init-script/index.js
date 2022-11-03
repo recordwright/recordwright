@@ -24,9 +24,14 @@ const EVENTCONST = {
 let eventRecorder = new BrowserEventRecorder()
 Object.keys(EVENTCONST).forEach(item => {
     document.addEventListener(item, event => {
-        /**@type {} */
-        BrowserEventRecorder
+        eventRecorder.handleBrowserAction(event, item)
     }, { capture: true })
 })
 
-console.log('hello world from event-recorder')
+document.addEventListener('mouseover', async event => {
+    eventRecorder.handleMouseOverEvent(event)
+}, { capture: true })
+
+document.addEventListener("mouseout", event => {
+    eventRecorder.handleMouseOutEvent(event)
+})

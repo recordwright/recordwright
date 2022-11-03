@@ -1,4 +1,6 @@
 import { getXPath } from 'http://localhost:3600/resource/js/getXPath.js';
+import { getElementPos } from "http://localhost:3600/resource/js/getElementPosition.js";
+import { PotentialMatchManager } from "http://localhost:3600/resource/js/PotentialMatchManager.js";
 class HoverElementEntry {
     /**
      * @param {HTMLElement} element 
@@ -48,8 +50,8 @@ export class BrowserEventRecorder {
      * @param {import('./PotentialMatchManager.js').PotentialMatchManager} potentialMatchManager 
      * @param {number} browserIndex
      */
-    constructor(potentialMatchManager, browserIndex) {
-        this.potentialMatchManager = potentialMatchManager
+    constructor(browserIndex) {
+        this.potentialMatchManager = new PotentialMatchManager()
         this.browserIndex = browserIndex
         this.hoverManager = new HoverElementManager()
     }
@@ -84,9 +86,16 @@ export class BrowserEventRecorder {
      * @param {HTMLElement} targetElement 
      */
     _getLocatorByTargetElement(targetElement) {
+        let selector = getXPath(targetElement)
         try {
-            selector = getXPath(targetElement)
+            let customLocator = window.getLocator(targetElement, selector)
+            if (customLocator.selector)
+                selector = customLocator.selector
+            else if (customLocator.target != targetElement)
+                selector = getXPath(targetElement)
+            let targetElement = customLocator.target
         } catch (error) {
+
         }
 
         return {
