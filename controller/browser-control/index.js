@@ -42,8 +42,9 @@ class BrowserControl {
 
         this.activePage = await this.browser.newPage(this.browserConfig)
         //inject master scripts whenever a frame/page is attached
-        let scriptPath = path.join(__dirname, './init-script/index.js')
-        await this.activePage.addInitScript({ path: scriptPath })
+
+        let currentUrl = `http://localhost:${config.app.port}/resource/js/index.js`
+        await this.activePage.addInitScript(this._addInitScriptAsModule, currentUrl)
 
         //expose function from all over the places
         for (let funcName of Object.keys(this.exposedFunc)) {
@@ -53,6 +54,22 @@ class BrowserControl {
         this.initCompleted = true
     }
 
-    async
+    async _addInitScriptAsModule(currentUrl) {
+
+        while (true) {
+            if (document != null) break
+            await new Promise(resolve => setTimeout(resolve, 25))
+        }
+        try {
+            //add script block
+            let finderScript = document.createElement("script");
+            finderScript.setAttribute('type', 'module')
+            finderScript.setAttribute('src', currentUrl)
+
+        } catch (error) {
+
+        }
+
+    }
 }
 module.exports = BrowserControl

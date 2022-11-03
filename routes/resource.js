@@ -5,9 +5,9 @@ const path = require('path')
 const fs = require('fs').promises
 /* GET users listing. */
 router.get('/js/:dependency', async function (req, res, next) {
-    let path = path.join(__dirname, '../controller/browser-control/init-script', req.params.dependency)
+    let filePath = path.join(__dirname, '../controller/browser-control/init-script', req.params.dependency)
     try {
-        await fs.access(path)
+        await fs.access(filePath)
         let fileContent = await fs.readFile(filePath)
         let fileStr = fileContent.toString()
         res.type('.js')

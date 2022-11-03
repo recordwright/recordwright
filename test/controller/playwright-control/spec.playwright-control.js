@@ -5,6 +5,5 @@ describe('record wright tester', () => {
         let playwrightControl = new BrowserManager()
         playwrightControl.createBrowserContext()
         await playwrightControl.waitForInit()
-        console.log()
     }).timeout(99999999999)
 })
