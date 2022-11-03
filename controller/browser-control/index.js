@@ -44,6 +44,8 @@ class BrowserControl {
         //inject master scripts whenever a frame/page is attached
 
         let currentUrl = `http://localhost:${config.app.port}/resource/js/index.js`
+
+        //create init function. We cannot put it in the other class because it will throw error
         let initFunc = async function (currentUrl) {
             console.log(`Load Information from ${currentUrl}`)
 
@@ -56,6 +58,7 @@ class BrowserControl {
                 let finderScript = document.createElement("script");
                 finderScript.setAttribute('type', 'module')
                 finderScript.setAttribute('src', currentUrl)
+                finderScript.setAttribute('id', 'recordwright-init-module')
                 document.body.appendChild(finderScript);
 
             } catch (error) {
