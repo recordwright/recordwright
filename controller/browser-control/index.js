@@ -44,7 +44,28 @@ class BrowserControl {
         //inject master scripts whenever a frame/page is attached
 
         let currentUrl = `http://localhost:${config.app.port}/resource/js/index.js`
-        await this.activePage.addInitScript(this._addInitScriptAsModule, currentUrl)
+        let initFunc = async function (currentUrl) {
+            console.log(`Load Information from ${currentUrl}`)
+
+            while (true) {
+                if (document != null && document.body != null) break
+                await new Promise(resolve => setTimeout(resolve, 10))
+            }
+            try {
+                //add script block
+                let finderScript = document.createElement("script");
+                finderScript.setAttribute('type', 'module')
+                finderScript.setAttribute('src', currentUrl)
+                document.body.appendChild(finderScript);
+
+            } catch (error) {
+                console.log('Error During Browser Event Recorder Injection')
+                console.log(error)
+            }
+
+
+        }
+        await this.activePage.addInitScript(initFunc, currentUrl)
 
         //expose function from all over the places
         for (let funcName of Object.keys(this.exposedFunc)) {
@@ -54,22 +75,6 @@ class BrowserControl {
         this.initCompleted = true
     }
 
-    async _addInitScriptAsModule(currentUrl) {
 
-        while (true) {
-            if (document != null) break
-            await new Promise(resolve => setTimeout(resolve, 25))
-        }
-        try {
-            //add script block
-            let finderScript = document.createElement("script");
-            finderScript.setAttribute('type', 'module')
-            finderScript.setAttribute('src', currentUrl)
-
-        } catch (error) {
-
-        }
-
-    }
 }
 module.exports = BrowserControl

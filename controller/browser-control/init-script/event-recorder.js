@@ -123,8 +123,6 @@ export class BrowserEventRecorder {
         let targetInnerText = target.innerText
         let parameter = null
 
-        let 
-         = ''
         let targetPicPath = ''
         let fileNames = []
         let isCallBluestoneConsole = false

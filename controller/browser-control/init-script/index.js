@@ -28,3 +28,5 @@ Object.keys(EVENTCONST).forEach(item => {
         BrowserEventRecorder
     }, { capture: true })
 })
+
+console.log('hello world from event-recorder')
