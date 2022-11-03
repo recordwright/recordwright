@@ -11,13 +11,13 @@
   * Testcase Generator
   * Testcase Parser
 * Function Control
-  * Function Parser
+  * Function Parser (x)
   * Func Generator
   * Active Function Tracker
-* Locator Control
+* Locator Control (x)
   * Locator Generator
   * Locator Parser/tracker
-    * Active Locator Tracker
+  * Active Locator Tracker
 * Browser Meta Control - Save meta inforamtion from current recorded screen
   * Browser Selection
   * Record Html

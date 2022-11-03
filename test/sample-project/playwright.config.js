@@ -40,6 +40,7 @@ const config = {
         },
 
         ...devices['Desktop Chrome'],
+        viewport: { height: 978, width: 1890 }
       }
     }
   ],

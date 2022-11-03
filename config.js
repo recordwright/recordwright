@@ -52,13 +52,12 @@ function configFunc() {
     config.code.urlBlackList = projectObj.urlBlackList
     config.code.locatorAttributePreference = projectObj.locatorAttributePreference || []
     config.code.locatorSnapshotFolder = path.join(projectFolder, 'locator')
-    //load puppeteer config6
+    //load recordwright config
 
     if (projectObj.config) {
         let recordwrightConfigPath = path.join(projectFolder, projectObj.config)
         config.recordwright = require(recordwrightConfigPath).projects[0]
         //force headless mode to be false because bluestone need to display browser
-        config.recordwright.use.headless = true
     }
 
     //load locator generator engine

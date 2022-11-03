@@ -13,11 +13,13 @@ var usersRouter = require('./routes/users');
 // const { WorkflowRecord } = require('./controller/record/class/index')
 // const PuppeteerControl = require('./controller/puppeteer/class')
 // const UI = require('./controller/ui')
+const RecordManager = require('./controller/record-manager')
 var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
-
+let recordManager = new RecordManager(io)
 app.locals.io = io
+
 // app.locals.puppeteerControl = new PuppeteerControl()
 // app.locals.workflow = new WorkflowRecord(app.locals.puppeteerControl)
 // app.locals.ui = new UI(app.locals.workflow)
@@ -26,7 +28,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
 app.use(function (req, res, next) {
-  res.io = io;
+  res.recordManager = recordManager;
   next();
 });
 app.use(logger('dev'));
