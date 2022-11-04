@@ -151,6 +151,8 @@ export class BrowserEventRecorder {
         this.potentialMatchManager = new PotentialMatchManager()
         this.browserIndex = browserIndex
         this.hoverManager = new HoverElementManager()
+        /**@type {TargetInfo} */
+        this.mouseOverTargetInfo = null
     }
     /**
      * based on event inforamtion, calculate relative x y in percentage.
@@ -286,7 +288,7 @@ export class BrowserEventRecorder {
             targetElement = document.body
         }
         let targetInfo = new TargetInfo(this.potentialMatchManager, 'mouseover', targetElement)
-        console.log(targetInfo)
+        this.mouseOverTargetInfo = targetInfo
         this.hoverManager.mouseIn(event.target)
 
         let noLocatorFound = 'rgba(255, 0, 145, 0.45)'
