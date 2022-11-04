@@ -1,7 +1,7 @@
 const config = require('../../config')
 const { chromium, devices } = require('playwright');
 const path = require('path')
-
+const PictureWorker = require('./class/picture-worker')
 class BrowserControl {
     /**
      * 
@@ -9,9 +9,10 @@ class BrowserControl {
      * @param {Object.<string,Function>} exposedFunc 
      * @param {object} io 
      */
-    constructor(browserConfig = config.recordwright.use, exposedFunc = [], io) {
+    constructor(browserConfig = config.recordwright.use, io) {
         this.browser = null
-        this.activePage = null
+        /**@type {import('playwright').Page} */
+        this._activePage = null
         this.initCompleted = true
         this.browserConfig = {
             args: browserConfig.launchOptions.args,
@@ -19,9 +20,15 @@ class BrowserControl {
             ...browserConfig
         }
         this.browserList = []
-        this.exposedFunc = exposedFunc
+        this.exposedFunc = []
         this.io = io
-
+        this.pictureWorker = new PictureWorker(this._activePage)
+    }
+    get activePage() {
+        return this._activePage
+    }
+    set activePage(page) {
+        this._activePage = page
     }
     /**
      * Keep waiting till initialization is completed
@@ -35,12 +42,12 @@ class BrowserControl {
     /**
      * Initialize browser instances
      */
-    async createBrowserContext({ headless = false } = {}) {
+    async createBrowserContext({ headless = false, exposedFunc = [] } = {}) {
         this.initCompleted = false
         //-----------------------main func------------------------
         this.browser = await chromium.launch({ ...this.browserConfig, headless: headless })
 
-        this.activePage = await this.browser.newPage(this.browserConfig)
+        this._activePage = await this.browser.newPage(this.browserConfig)
         //inject master scripts whenever a frame/page is attached
 
         let currentUrl = `http://localhost:${config.app.port}/resource/js/index.js`
@@ -68,11 +75,12 @@ class BrowserControl {
 
 
         }
-        await this.activePage.addInitScript(initFunc, currentUrl)
+        await this._activePage.addInitScript(initFunc, currentUrl)
 
         //expose function from all over the places
+        this.exposedFunc = exposedFunc
         for (let funcName of Object.keys(this.exposedFunc)) {
-            await this.activePage.exposeFunction(funcName, this.exposedFunc[funcName])
+            await this._activePage.exposeFunction(funcName, this.exposedFunc[funcName])
         }
         //-----------------------main func complete---------------
         this.initCompleted = true
@@ -82,7 +90,7 @@ class BrowserControl {
      */
     async __waitForPotentialMatchManagerPopoulated() {
         while (true) {
-            let potentialMatchCount = await this.activePage.evaluate(item => {
+            let potentialMatchCount = await this._activePage.evaluate(item => {
                 return window.eventRecorder.potentialMatchManager.currentPotentialMatchList.length
             })
             if (potentialMatchCount > 0)

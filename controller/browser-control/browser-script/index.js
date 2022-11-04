@@ -59,6 +59,7 @@ const mutationObserverCallback = function (mutationsList, observer) {
 
     /**@type {import('./PotentialMatchManager').PotentialMatchManager} */
     eventRecorder.potentialMatchManager.scanLocator()
+    window.takePictureSnapshot()
     // console.log(mutationsList)
 }
 
