@@ -1,4 +1,4 @@
-function getElementByXpath(xpath, source = document) {
+export function getElementByXpath(xpath, source = document) {
     let result = []
     let elements = null
     try {

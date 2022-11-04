@@ -1,3 +1,4 @@
+import { getElementByXpath } from 'http://localhost:3600/resource/js/getXPath.js';
 class LocatorEntry {
     /**
      * 
@@ -111,8 +112,8 @@ export class PotentialMatchManager {
         if (locatorEntry == null) return []
         return locatorEntry.potentialMatch
     }
-    updateBluestoneRegisteredLocator(locators) {
-        this.bluestoneRegisteredLocator = locators
+    async updateBluestoneRegisteredLocator() {
+        this.bluestoneRegisteredLocator = await window.getDefinedLocator()
     }
     /**
      * update potential match information to the target
@@ -122,7 +123,7 @@ export class PotentialMatchManager {
      * @returns {number[]} list of index of matched locator
      */
     addPotentialMatchToTarget(target, index) {
-
+        if (target == document) return
         let locatorEntry = this.getElement(this.proposedPotentialMatchList, target)
 
 
@@ -210,28 +211,17 @@ export class PotentialMatchManager {
         for (let i = 0; i < currentLocatorList.length; i++) {
             currentLocatorList[i].selector = ''
             let locator = currentLocatorList[i]
-            let currentLocatorOptions = locator.Locator
+            let currentLocator = locator.Locator
             let currentElement = null
-            let currentLocator
-
-
-            for (let locatorOptionIndex = 0; locatorOptionIndex < currentLocatorOptions.length; locatorOptionIndex++) {
-
-                currentLocator = currentLocatorOptions[locatorOptionIndex]
-                let currentElementList = []
-                try {
-                    currentElementList = this.getElementsByLocator(currentLocator)
-                } catch (error) {
-                    console.log(`Issue on locator at index:${i},locator:${currentLocator}`)
-                    console.log(error)
-                    continue
-                }
-
+            try {
+                let currentElementList = this.getElementsByLocator(currentLocator)
                 //if current locator find element, break current loop to save time
                 if (currentElementList.length == 1) {
                     currentElement = currentElementList[0]
-                    break
                 }
+            } catch (error) {
+                console.log(`Issue on locator at index:${i},locator:${currentLocator}`)
+                console.log(error)
             }
 
             if (currentElement != null) {

@@ -47,19 +47,32 @@ class LocatorManager {
      * Reset Locator's activation status and mark specific index to be active
      * @param {Array<number>} locatorIndexList 
      */
-    setActiveLocator(locatorIndexList) {
-        this.__resetActiveLocatorStatus()
-        locatorIndexList.forEach(index => this.locatorLibrary[index].selector = true)
+    exposeSetActiveLocator() {
+        let locatorLibrary = this.locatorLibrary
+        return function (locatorIndexList) {
+            this.__resetActiveLocatorStatus()
+            locatorIndexList.forEach(index => locatorLibrary[index].selector = true)
+        }
     }
     /**
      * Return all active elements as an array
      * @returns {Array<Locator>}
      */
-    getActiveSelectors() {
-        let activeSelectors = this.locatorLibrary.filter(item => {
-            return item.selector != null && item.selector != ''
-        })
-        return activeSelectors
+    exposeGetActiveSelectors() {
+        let locatorLibrary = this.locatorLibrary
+        return function () {
+            let activeSelectors = locatorLibrary.filter(item => {
+                return item.selector != null && item.selector != ''
+            })
+            return activeSelectors
+        }
+
+    }
+    exposeGetDefinedLocator() {
+        let locatorLibrary = this.locatorLibrary
+        return function () {
+            return locatorLibrary
+        }
     }
     /**
      * Load bluestone-locator.js and return locatorLibrary function

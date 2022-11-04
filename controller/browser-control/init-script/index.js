@@ -22,6 +22,8 @@ const EVENTCONST = {
 }
 /** @type {import('./event-recorder').BrowserEventRecorder} */
 let eventRecorder = new BrowserEventRecorder()
+window.eventRecorder = eventRecorder
+
 Object.keys(EVENTCONST).forEach(item => {
     document.addEventListener(item, event => {
         eventRecorder.handleBrowserAction(event, item)
