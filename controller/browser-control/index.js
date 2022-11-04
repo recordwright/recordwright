@@ -35,10 +35,10 @@ class BrowserControl {
     /**
      * Initialize browser instances
      */
-    async createBrowserContext() {
+    async createBrowserContext({ headless = false }) {
         this.initCompleted = false
         //-----------------------main func------------------------
-        this.browser = await chromium.launch(this.browserConfig)
+        this.browser = await chromium.launch({ ...this.browserConfig, headless: headless })
 
         this.activePage = await this.browser.newPage(this.browserConfig)
         //inject master scripts whenever a frame/page is attached
@@ -77,7 +77,19 @@ class BrowserControl {
         //-----------------------main func complete---------------
         this.initCompleted = true
     }
-
+    /**
+     * Wait till potential match manager populated
+     */
+    async __waitForPotentialMatchManagerPopoulated() {
+        while (true) {
+            let potentialMatchCount = await this.activePage.evaluate(item => {
+                return window.eventRecorder.potentialMatchManager.currentPotentialMatchList.length
+            })
+            if (potentialMatchCount > 0)
+                break
+            await new Promise(resolve => setTimeout(resolve, 200))
+        }
+    }
 
 }
 module.exports = BrowserControl

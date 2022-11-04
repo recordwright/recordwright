@@ -23,7 +23,8 @@ const EVENTCONST = {
 /** @type {import('./event-recorder').BrowserEventRecorder} */
 let eventRecorder = new BrowserEventRecorder()
 window.eventRecorder = eventRecorder
-eventRecorder.potentialMatchManager.updateBluestoneRegisteredLocator()
+await eventRecorder.potentialMatchManager.updateBluestoneRegisteredLocator()
+await eventRecorder.potentialMatchManager.scanLocator()
 
 
 
@@ -47,6 +48,10 @@ const config = { attributes: true, childList: true, subtree: true };
 
 // Create an observer instance linked to the callback function
 const mutationObserverCallback = function (mutationsList, observer) {
+    //discard style change because that's how we change the color
+    let isEveryMutationStyleChange = mutationsList.every(item => item.type == 'attributes' && item.attributeName == 'style')
+    if (isEveryMutationStyleChange) return
+
     // console.log(mutationsList)
     // captureScreenshot('dom tree change')
     //only proceed change that is introduced by RPA engine or code change
