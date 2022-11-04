@@ -35,7 +35,7 @@ class BrowserControl {
     /**
      * Initialize browser instances
      */
-    async createBrowserContext({ headless = false }) {
+    async createBrowserContext({ headless = false } = {}) {
         this.initCompleted = false
         //-----------------------main func------------------------
         this.browser = await chromium.launch({ ...this.browserConfig, headless: headless })

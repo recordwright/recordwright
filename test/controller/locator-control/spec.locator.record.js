@@ -22,10 +22,10 @@ describe('Locator Control', () => {
     it('should set reset rest of variable and set expected value correctly', async () => {
         let locatorPath = path.join(__dirname, './baseline/recordwright-locator-priorchange.js')
         let locatorControl = new LocatorControl(locatorPath)
-        locatorControl.setActiveLocator([0])
+        locatorControl.exposeSetActiveLocator()([0])
         assert.equal(locatorControl.__locatorLibrary[0].selector, true)
         assert.equal(locatorControl.__locatorLibrary[1].selector, null)
-        locatorControl.setActiveLocator([1])
+        locatorControl.exposeSetActiveLocator()([1])
         assert.equal(locatorControl.__locatorLibrary[0].selector, null)
         assert.equal(locatorControl.__locatorLibrary[1].selector, true)
     })
@@ -33,8 +33,8 @@ describe('Locator Control', () => {
         let locatorPath = path.join(__dirname, './baseline/recordwright-locator-priorchange.js')
         let locatorControl = new LocatorControl(locatorPath)
         for (let i = 0; i < locatorControl.__locatorLibrary.length; i++) {
-            locatorControl.setActiveLocator([i])
-            let activeLocators = locatorControl.getActiveSelectors()
+            locatorControl.exposeSetActiveLocator()([i])
+            let activeLocators = locatorControl.exposeGetActiveSelectors()()
             assert.equal(activeLocators.length, 1)
             assert.equal(activeLocators[0].Locator, locatorControl.__locatorLibrary[i].Locator)
         }
