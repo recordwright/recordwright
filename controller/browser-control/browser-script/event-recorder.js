@@ -10,6 +10,103 @@ class HoverElementEntry {
         this.prevStyle = element.style.backgroundColor
     }
 }
+class TargetInfo {
+    /**
+     * This is used to store meta informaton for the target
+     * @param {PotentialMatchManager} potentialMatchManager 
+     * @param {string} command 
+     * @param {HTMLElement} targetElement 
+     */
+    constructor(potentialMatchManager, command, targetElement) {
+        this.potentialMatchManager = potentialMatchManager
+        this.command = command
+        this.targetElement = targetElement
+        this.timeStamp = Date.now()
+        this.selector = ''
+        this.iframe = ''
+        this.framePotentialMatch = []
+        this.potentialMatch = []
+        this.currentSelectedIndex = null
+        this.position = {}
+        this.targetInnerText = ''
+        this.healingTree = '{}'
+        this.parameter = ''
+        this.init()
+
+    }
+    /**
+     * Output parameter into standardized format
+     * @param {string} parameter 
+     * @returns 
+     */
+    output(parameter) {
+        this.parameter = parameter
+        return {
+            command: this.command,
+            iframe: this.iframe,
+            target: this.selector,
+            parameter: this.parameter,
+            targetInnerText: this.targetInnerText,
+            framePotentialMatch: this.framePotentialMatch,
+            potentialMatch: this.potentialMatch,
+            currentSelectedIndex: this.currentSelectedIndex,
+            pos: this.position,
+            timestamp: this.timeStamp,
+            healingTree: this.healingTree
+        }
+    }
+    init() {
+        let targetElement = this.targetElement
+
+        let targetElementLocatorResult = this._getLocatorByTargetElement(targetElement)
+        let target = targetElementLocatorResult.target
+        this.selector = targetElementLocatorResult.selector
+
+        let targetIFrameLocatorResult = this._getLocatorByTargetElement(window.frameElement)
+        this.iframe = targetIFrameLocatorResult.selector
+        this.framePotentialMatch = this.potentialMatchManager.getPotentialMatchByTarget(window.frameElement)
+        this.potentialMatch = this.potentialMatchManager.getPotentialMatchByTarget(target)
+
+        this.currentSelectedIndex = this.potentialMatchManager.getElementSelectorIndex(target)
+
+
+        this.position = getElementPos(target) // this is position in regards to the screen
+        this.targetInnerText = target.innerText
+
+        let atomicTree = ""
+        let atomicTreeStr = ""//atomicTree.stringify()
+        if (this.command != 'scroll') {
+            //will not capture auto-healing information during scroll
+            //it will significantly slow down the user experience
+            // will collect auto-healing when call bluestone console
+            // this will create noticible user experience slow down
+            // atomicTree = new AtomicElementTree(target)
+            // atomicTreeStr = atomicTree.stringify(atomicTree)
+        }
+    }
+    /**
+     * get locator by target element
+     * @param {HTMLElement} targetElement 
+     */
+    _getLocatorByTargetElement(targetElement) {
+        let selector = getXPath(targetElement)
+        try {
+            let customLocator = window.getLocator(targetElement, selector)
+            if (customLocator.selector)
+                selector = customLocator.selector
+            else if (customLocator.target != targetElement)
+                selector = getXPath(targetElement)
+            let targetElement = customLocator.target
+        } catch (error) {
+
+        }
+
+        return {
+            selector: selector,
+            target: targetElement
+        }
+    }
+}
 class HoverElementManager {
     constructor() {
         /**@type {HoverElementEntry[]} */
@@ -46,11 +143,11 @@ class HoverElementManager {
 }
 export class BrowserEventRecorder {
     /**
-     * 
-     * @param {import('./PotentialMatchManager.js').PotentialMatchManager} potentialMatchManager 
+     *      
      * @param {number} browserIndex
      */
     constructor(browserIndex) {
+        /**@type {import('./PotentialMatchManager').PotentialMatchManager} */
         this.potentialMatchManager = new PotentialMatchManager()
         this.browserIndex = browserIndex
         this.hoverManager = new HoverElementManager()
@@ -81,28 +178,7 @@ export class BrowserEventRecorder {
         return jsonStr
 
     }
-    /**
-     * get locator by target element
-     * @param {HTMLElement} targetElement 
-     */
-    _getLocatorByTargetElement(targetElement) {
-        let selector = getXPath(targetElement)
-        try {
-            let customLocator = window.getLocator(targetElement, selector)
-            if (customLocator.selector)
-                selector = customLocator.selector
-            else if (customLocator.target != targetElement)
-                selector = getXPath(targetElement)
-            let targetElement = customLocator.target
-        } catch (error) {
 
-        }
-
-        return {
-            selector: selector,
-            target: targetElement
-        }
-    }
     /**
      * @param {Event} event 
      */
@@ -113,28 +189,11 @@ export class BrowserEventRecorder {
         if (event.target == document) {
             targetElement = document.body
         }
-        let timeStamp = Date.now()
-        let selector = ''
-
-        let targetElementLocatorResult = this._getLocatorByTargetElement(targetElement)
-        let target = targetElementLocatorResult.target
-        selector = targetElementLocatorResult.selector
-
-        let targetIFrameLocatorResult = this._getLocatorByTargetElement(window.frameElement)
-        let iframe = targetIFrameLocatorResult.selector
-        let framePotentialMatch = this.potentialMatchManager.getPotentialMatchByTarget(window.frameElement)
-        let potentialMatch = this.potentialMatchManager.getPotentialMatchByTarget(target)
-
-        let currentSelectedIndex = this.potentialMatchManager.getElementSelectorIndex(target)
-
-
-        let position = getElementPos(target) // this is position in regards to the screen
-        let targetInnerText = target.innerText
+        let targetInfo = new TargetInfo(this.potentialMatchManager, command, targetElement)
         let parameter = null
 
-        let targetPicPath = ''
         let fileNames = []
-        let isCallBluestoneConsole = false
+
         switch (command) {
             case EVENTCONST.visibilitychange:
                 if (document.visibilityState == 'hidden') return
@@ -188,7 +247,6 @@ export class BrowserEventRecorder {
                             // window.stopRecording()
                             this.potentialMatchManager.setActiveLocator()
                             // captureScreenshot('alt+q')
-                            isCallBluestoneConsole = true
                             console.log('call in-browser spy' + JSON.stringify(position))
                             break
                         }
@@ -206,46 +264,8 @@ export class BrowserEventRecorder {
                 break;
         }
 
-        // if (isParentDefinedAndIdentical(event.target, position, potentialMatch)) {
-        //     console.log()
-        //     let parent = event.target.parentElement
 
-        //     potentialMatch = parent.getAttribute(BLUESTONE.bluestonePotentialMatchIndexes)
-
-        //     selector = finder(parent)
-        // }
-
-        let atomicTree = ""
-        let atomicTreeStr = ""//atomicTree.stringify()
-        if (command != EVENTCONST.scroll && !isCallBluestoneConsole) {
-            //will not capture auto-healing information during scroll
-            //it will significantly slow down the user experience
-            // will collect auto-healing when call bluestone console
-            // this will create noticible user experience slow down
-            // atomicTree = new AtomicElementTree(target)
-            // atomicTreeStr = atomicTree.stringify(atomicTree)
-        }
-        const eventDetail = {
-            command: command,
-            iframe: iframe,
-            target: selector,
-            parameter: parameter,
-            targetInnerText: targetInnerText,
-            framePotentialMatch: framePotentialMatch,
-            targetPicPath: targetPicPath,
-            potentialMatch: potentialMatch,
-            currentSelectedIndex: currentSelectedIndex,
-            pos: {
-                x: position.x,
-                y: position.y,
-                right: position.right,
-                buttom: position.buttom,
-                height: position.height,
-                width: position.width
-            },
-            timestamp: timeStamp,
-            healingTree: atomicTreeStr
-        }
+        let eventDetail = targetInfo.output(parameter)
 
         // new CustomEvent('eventDetected', { detail: eventDetail });
         //will only log event from visible behavior except for file upload
@@ -253,7 +273,7 @@ export class BrowserEventRecorder {
         if ((position.height > 0 && position.width > 0) || command == 'upload' || command == null) {
             window.logEvent(eventDetail)
         }
-
+        console.log(targetInfo)
         // console.log(JSON.stringify(event))
     }
     /**
@@ -261,72 +281,49 @@ export class BrowserEventRecorder {
      * @param {Event} event 
      */
     handleMouseOverEvent(event) {
-        let selector = null
-        let locatorInfo = this._getLocatorByTargetElement(event.target)
-        let target = locatorInfo.target
-        selector = locatorInfo.selector
-        if (selector == null) return
-        const innerText = target.innerText
-        let position = {}
-        try {
-            position = getElementPos(target)
-        } catch (error) {
-            console.log(error)
+        let targetElement = event.target
+        if (targetElement == document) {
+            targetElement = document.body
         }
-
-        // let atomicTree = new AtomicElementTree(target)
-        // let atomicTreeStr = atomicTree.stringify()
-        let atomicTree = {}
-        let atomicTreeStr = '{}'
-        //style change will only be applied to source element
-        const previousStyle = event.target.style.backgroundColor
+        let targetInfo = new TargetInfo(this.potentialMatchManager, 'mouseover', targetElement)
+        console.log(targetInfo)
         this.hoverManager.mouseIn(event.target)
-
-        let frameInfo = this._getLocatorByTargetElement(window.frameElement)
-        let iFrame = frameInfo.selector
-        let framePotentialMatch = this.potentialMatchManager.getPotentialMatchByTarget(window.frameElement)
-        let potentialMatch = this.potentialMatchManager.getPotentialMatchByTarget(target)
 
         let noLocatorFound = 'rgba(255, 0, 145, 0.45)'
         let locatorFound = 'rgba(0, 223, 145, 0.45)'
         //depends on the color schema, display different color to give user a hint for next step
 
         //if we have set the final locator, mark it as green
-        let currentSelectedIndex = this.potentialMatchManager.getElementSelectorIndex(target)
+        let currentSelectedIndex = targetInfo.currentSelectedIndex
 
         if (currentSelectedIndex) {
             event.target.style.backgroundColor = locatorFound
-            window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, currentSelectedIndex, atomicTreeStr)
+            // window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, currentSelectedIndex, atomicTreeStr)
             return
         }
 
 
         //no match mark as no locator found
-        if (potentialMatch.length == 0) {
+        if (targetInfo.potentialMatch.length == 0) {
             event.target.style.backgroundColor = noLocatorFound
-            window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, null, atomicTreeStr)
+            // window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, null, atomicTreeStr)
             // setStateToAllEvents(true, BLUESTONE.bluestoneIgnoreElement, BLUESTONE.prevDisableStatus)
             // console.log('no potential match index')
             return
         }
 
 
-        // console.log(potentialMatch)
-        // console.log(potentialMatchArray)
-        if (potentialMatch.length == 1) {
+
+        if (targetInfo.potentialMatch.length == 1) {
             //exact one match, we are good
             event.target.style.backgroundColor = locatorFound
-            window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, 0, atomicTreeStr)
-            // setStateToAllEvents(false, BLUESTONE.bluestoneIgnoreElement, BLUESTONE.prevDisableStatus)
-            // console.log('only 1 potential match index')
+            // window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, 0, atomicTreeStr)
             return
         }
 
-        //if toehrwise, 
-        // console.log('more than 1 potential matches')
+        //not found
         event.target.style.backgroundColor = noLocatorFound
-        window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, null, atomicTreeStr)
-        // setStateToAllEvents(true, BLUESTONE.bluestoneIgnoreElement, BLUESTONE.prevDisableStatus)
+        // window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, null, atomicTreeStr)
 
 
 

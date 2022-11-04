@@ -23,6 +23,10 @@ const EVENTCONST = {
 /** @type {import('./event-recorder').BrowserEventRecorder} */
 let eventRecorder = new BrowserEventRecorder()
 window.eventRecorder = eventRecorder
+eventRecorder.potentialMatchManager.updateBluestoneRegisteredLocator()
+
+
+
 
 Object.keys(EVENTCONST).forEach(item => {
     document.addEventListener(item, event => {
@@ -37,3 +41,24 @@ document.addEventListener('mouseover', async event => {
 document.addEventListener("mouseout", event => {
     eventRecorder.handleMouseOutEvent(event)
 })
+
+// Options for the observer (which mutations to observe)
+const config = { attributes: true, childList: true, subtree: true };
+
+// Create an observer instance linked to the callback function
+const mutationObserverCallback = function (mutationsList, observer) {
+    // console.log(mutationsList)
+    // captureScreenshot('dom tree change')
+    //only proceed change that is introduced by RPA engine or code change
+    // captureHtml('dom tree change')
+
+    /**@type {import('./PotentialMatchManager').PotentialMatchManager} */
+    eventRecorder.potentialMatchManager.scanLocator()
+    // console.log(mutationsList)
+}
+
+const observer = new MutationObserver(mutationObserverCallback);
+
+// Start observing the target node for configured mutations
+observer.observe(document, config);
+

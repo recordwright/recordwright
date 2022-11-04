@@ -16,7 +16,7 @@ describe('resource api library', () => {
     it('should get load js file correctly', async () => {
 
         let res = await recordwrightBackend.getJsResource('index.js')
-        let jsPath = path.join(__dirname, '../../controller/browser-control/init-script/index.js')
+        let jsPath = path.join(__dirname, '../../controller/browser-control/browser-script/index.js')
         let fileContent = (fs.readFileSync(jsPath)).toString()
         assert.equal(res.data, fileContent)
         console.log()
