@@ -16,7 +16,7 @@ describe('Record Manager', () => {
     it('it should expose function correctly', async () => {
         let recordManager = new RecordManager({})
         await recordManager.start({ headless: true })
-        await recordManager.browserControl._activePage.goto('https://playwright.dev/')
+        await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         let commandNameList = Object.keys(recordManager.funcDict)
         for (const commandName of commandNameList) {
             let functionExists = await recordManager.browserControl._activePage.evaluate((commandName) => {

@@ -21,7 +21,7 @@ describe('record wright tester', () => {
         let browserControl = new BrowserManager()
         browserControl.createBrowserContext({ headless: true })
         await browserControl.waitForInit()
-        await browserControl._activePage.goto('https://playwright.dev/')
+        await browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         let module = await browserControl._activePage.locator('//*[@id="recordwright-init-module"]')
         let moduleCount = await module.count()
         assert.equal(moduleCount, 1)

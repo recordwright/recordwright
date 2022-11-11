@@ -1,9 +1,9 @@
 module.exports = {
-    'get started': {
-        locator: '//*[text()=\'Get started\']',
+    'input': {
+        locator: '//input[@placeholder]',
         screenshot: '',
-        displayName: 'get started',
-        snapshot: './locator/get started.json'
+        displayName: 'input',
+        snapshot: './locator/input.json'
     },
     'close button': {
         locator: '.modal-card-close-button',

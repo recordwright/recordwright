@@ -16,9 +16,9 @@ describe('Potential Match Manager', () => {
     it('should mark element with 1 potential match as green', async () => {
         let recordManager = new RecordManager({})
         await recordManager.start({ headless: true })
-        await recordManager.browserControl.activePage.goto('https://playwright.dev/')
+        await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
-        let btnGetStarted = await recordManager.browserControl.activePage.locator(Locator['get started'].locator)
+        let btnGetStarted = await recordManager.browserControl.activePage.locator(Locator['input'].locator)
         await btnGetStarted.hover()
         let backgroundColor = await btnGetStarted.evaluate(item => {
             return item.style.backgroundColor
@@ -28,7 +28,7 @@ describe('Potential Match Manager', () => {
     it('should mark element with no potential match as red', async () => {
         let recordManager = new RecordManager({})
         await recordManager.start({ headless: true })
-        await recordManager.browserControl.activePage.goto('https://playwright.dev/')
+        await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
         let btnGetStarted = await recordManager.browserControl.activePage.locator('//h1')
         await btnGetStarted.hover()

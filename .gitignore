@@ -11,3 +11,4 @@ public/temp/**/*.snapshot.json
 testrun.json
 result/testrun/report.json
 *.mhtml
+test/sample-project/componentPic/

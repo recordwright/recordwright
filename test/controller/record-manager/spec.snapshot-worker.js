@@ -16,7 +16,7 @@ describe('Snapshot Worker', () => {
     it('it should screenshot correctly', async () => {
         let recordManager = new RecordManager({})
         await recordManager.start({ headless: true })
-        await recordManager.browserControl._activePage.goto('https://playwright.dev/')
+        await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
 
         // await new Promise(resolve => setTimeout(resolve, 99999999))
     }).timeout(99999999)
