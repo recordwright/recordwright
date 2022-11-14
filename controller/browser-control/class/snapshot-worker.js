@@ -59,9 +59,7 @@ class WorkerBase {
                     taskQueue.push('')
                     return
                 }
-                if (taskQueue.length == 0) {
-                    taskQueue.push('')
-                }
+                taskQueue.push('')
 
                 let snapshotPath
                 try {
