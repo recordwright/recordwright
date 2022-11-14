@@ -57,6 +57,7 @@ describe('Resource Manager - Snapshot Worker', () => {
         if (!recordManager.browserControl.activeSnapshotWorker.records[0].path.includes('.jpeg')) {
             assert.fail('Output file is not a picture')
         }
+        await new Promise(resolve => setTimeout(resolve, 100))
         try {
             fs.accessSync(recordManager.browserControl.activeSnapshotWorker.records[0].path)
         } catch (error) {
@@ -90,5 +91,25 @@ describe('Resource Manager - Snapshot Worker', () => {
         await waitTillScreenshotEqualToCount(recordManager, 2)
 
     }).timeout(10000)
+    it('should take html snapshot by the time page is loaded', async () => {
+        await recordManager.start({ headless: true })
+        await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
+        await recordManager.waitForInit()
+        await waitTillScreenshotEqualToCount(recordManager, 1)
+        recordManager.browserControl.activeSnapshotWorker.isTakeSnapshot = true
+        await recordManager.browserControl.activePage.evaluate(async item => {
+            window.takePictureSnapshot('hello world')
+        })
+        await waitTillScreenshotEqualToCount(recordManager, 2)
+        if (!recordManager.browserControl.activeSnapshotWorker.records[1].path.includes('.mhtml')) {
+            assert.fail('Output file is not a snapshot')
+        }
+        await new Promise(resolve => setTimeout(resolve, 100))
+        try {
+            fs.accessSync(recordManager.browserControl.activeSnapshotWorker.records[1].path)
+        } catch (error) {
+            assert.fail('Unable to create html snapshot correctly in the disk')
+        }
 
+    }).timeout(10000)
 })

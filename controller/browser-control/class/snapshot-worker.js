@@ -1,5 +1,6 @@
 const { Page } = require('playwright')
 const path = require("path")
+const fs = require('fs').promises
 class WorkerRecordEntry {
     /**
      * 
@@ -53,8 +54,8 @@ class WorkerBase {
         let filePath = this.getNewSnapshotPath()
         let WorkerRecordEntryClass = WorkerRecordEntry
         let mainThread = null
-        let isTakeSnapshot = this.isTakeSnapshot
-        // let cdpSession = null
+        let context = this
+        let cdpSession = null
         async function takeSnapshot(sianature = null) {
             let isMainThread = null
             while (true) {
@@ -73,12 +74,11 @@ class WorkerBase {
 
                 let snapshotPath
                 try {
-                    if (isTakeSnapshot) {
+                    if (context.isTakeSnapshot) {
                         //take snapshot
-                        let cdpSession = null
                         snapshotPath = filePath + 'mhtml'
                         if (cdpSession == null) {
-                            cdpSession = await page.target().createCDPSession();
+                            cdpSession = await page.context().newCDPSession(page);
                             await cdpSession.send('Page.enable');
                         }
                         let mHtmlData = null
@@ -93,7 +93,8 @@ class WorkerBase {
                     } else {
                         //take screenshot instead
                         snapshotPath = filePath + 'jpeg'
-                        await page.screenshot({ quality: 40, type: 'jpeg', scale: 'css', path: snapshotPath })
+                        let snapshot = await page.screenshot({ quality: 40, type: 'jpeg', scale: 'css' })
+                        fs.writeFile(snapshotPath, snapshot)
                     }
                 }
 
