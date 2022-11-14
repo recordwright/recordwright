@@ -15,7 +15,7 @@ describe('Record Manager', () => {
     })
     it('it should expose function correctly', async () => {
         let recordManager = new RecordManager({})
-        await recordManager.start({ headless: false })
+        await recordManager.start({ headless: true })
         await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         let commandNameList = Object.keys(recordManager.funcDict)
         for (const commandName of commandNameList) {
@@ -24,6 +24,6 @@ describe('Record Manager', () => {
             }, commandName)
             assert.equal(functionExists, true, `${commandName} is not exposed correctly`)
         }
-        await new Promise(resolve => setTimeout(resolve, 99999999))
-    }).timeout(99999999)
+        // await new Promise(resolve => setTimeout(resolve, 99999999))
+    }).timeout(5000)
 })
