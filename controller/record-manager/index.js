@@ -18,8 +18,7 @@ class RecordManager {
         return {
             setActiveLocator: this.locatorControl.exposeSetActiveLocator(),
             getActiveSelectors: this.locatorControl.exposeGetActiveSelectors(),
-            getDefinedLocator: this.locatorControl.exposeGetDefinedLocator(),
-            takePictureSnapshot: this.browserControl.pictureWorker.exposeTakeSnapshot()
+            getDefinedLocator: this.locatorControl.exposeGetDefinedLocator()
 
         }
     }

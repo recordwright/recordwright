@@ -1,7 +1,7 @@
 const config = require('../../config')
 const { chromium, devices } = require('playwright');
 const path = require('path')
-const PictureWorker = require('./class/picture-worker')
+const SnapshotWorker = require('./class/snapshot-worker')
 class BrowserControl {
     /**
      * 
@@ -19,10 +19,12 @@ class BrowserControl {
             headless: false,
             ...browserConfig
         }
-        this.browserList = []
+        this.activeContext = null
+        this.contextList = []
+        this.pictureWorkerList = []
         this.exposedFunc = []
         this.io = io
-        this.pictureWorker = new PictureWorker(this._activePage)
+        this.activeSnapshotWorker = null
     }
     get activePage() {
         return this._activePage
@@ -45,9 +47,15 @@ class BrowserControl {
     async createBrowserContext({ headless = false, exposedFunc = [] } = {}) {
         this.initCompleted = false
         //-----------------------main func------------------------
-        this.browser = await chromium.launch({ ...this.browserConfig, headless: headless })
+        let launchOption = { ...this.browserConfig, headless: headless }
+        if (this.browser == null) {
+            this.browser = await chromium.launch(launchOption)
+        }
+        let context = await this.browser.newContext(launchOption)
+        this.activeContext = context
 
-        this._activePage = await this.browser.newPage(this.browserConfig)
+        this._activePage = await this.activeContext.newPage(this.browserConfig)
+        this.activeSnapshotWorker = new SnapshotWorker(this._activePage)
         //inject master scripts whenever a frame/page is attached
 
         let currentUrl = `http://localhost:${config.app.port}/resource/js/index.js`
@@ -79,6 +87,7 @@ class BrowserControl {
 
         //expose function from all over the places
         this.exposedFunc = exposedFunc
+        this.exposedFunc['takePictureSnapshot'] = this.activeSnapshotWorker.exposeTakeScreenshot()
         for (let funcName of Object.keys(this.exposedFunc)) {
             await this._activePage.exposeFunction(funcName, this.exposedFunc[funcName])
         }

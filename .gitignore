@@ -12,3 +12,4 @@ testrun.json
 result/testrun/report.json
 *.mhtml
 test/sample-project/componentPic/
+public/temp/componentPic/
