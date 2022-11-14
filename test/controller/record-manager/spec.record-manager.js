@@ -2,7 +2,7 @@ const RecordManager = require('../../../controller/record-manager')
 const RecordWrightBackend = require('../../support/recordwright-backend')
 const assert = require('assert')
 const Locator = require('../../sample-project/recordwright-locator')
-describe('Record Manager', () => {
+describe('Record Manager - main', () => {
     let recordwrightBackend = new RecordWrightBackend()
     before(async function () {
         await recordwrightBackend.launchApp()
