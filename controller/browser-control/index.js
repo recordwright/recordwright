@@ -32,6 +32,12 @@ class BrowserControl {
     set activePage(page) {
         this._activePage = page
     }
+    async closeAllInstances() {
+        let contextList = this.browser.contexts()
+        for (let context of contextList) {
+            await context.close()
+        }
+    }
     /**
      * Keep waiting till initialization is completed
      */

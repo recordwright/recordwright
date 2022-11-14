@@ -4,17 +4,22 @@ const assert = require('assert')
 const Locator = require('../../sample-project/recordwright-locator')
 describe('Record Manager - main', () => {
     let recordwrightBackend = new RecordWrightBackend()
+    let recordManager = new RecordManager({})
     before(async function () {
         await recordwrightBackend.launchApp()
         this.timeout(60000)
 
+    })
+    afterEach(async function () {
+        await recordManager.browserControl.closeAllInstances()
+        this.timeout(60000)
     })
     after(async function () {
         await recordwrightBackend.closeApp()
         this.timeout(60000)
     })
     it('it should expose function correctly', async () => {
-        let recordManager = new RecordManager({})
+
         await recordManager.start({ headless: true })
         await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         let commandNameList = Object.keys(recordManager.funcDict)

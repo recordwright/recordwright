@@ -5,13 +5,19 @@ const Locator = require('../../sample-project/recordwright-locator')
 const fs = require('fs')
 describe('Resource Manager - Snapshot Worker', () => {
     let recordwrightBackend = new RecordWrightBackend()
+    let recordManager = new RecordManager({})
     before(async function () {
         await recordwrightBackend.launchApp()
         this.timeout(60000)
 
     })
+    afterEach(async function () {
+        await recordManager.browserControl.closeAllInstances()
+        this.timeout(60000)
+    })
     after(async function () {
-        await recordwrightBackend.closeApp()
+        if (recordManager.browserControl)
+            await recordwrightBackend.closeApp()
         this.timeout(60000)
     })
     /**
@@ -22,7 +28,7 @@ describe('Resource Manager - Snapshot Worker', () => {
     let waitTillQueueCleared = async function (recordManager) {
         while (true) {
             await new Promise(resolve => setTimeout(resolve, 100))
-            let queueLength = recordManager.browserControl.activeSnapshotWorker._picQueue.length
+            let queueLength = recordManager.browserControl.activeSnapshotWorker._queue.length
             if (queueLength == 0)
                 break
         }
@@ -37,41 +43,41 @@ describe('Resource Manager - Snapshot Worker', () => {
     let waitTillScreenshotEqualToCount = async function (recordManager, count) {
         while (true) {
             await new Promise(resolve => setTimeout(resolve, 100))
-            let screenshotCount = recordManager.browserControl.activeSnapshotWorker.pictureRecords.length
+            let screenshotCount = recordManager.browserControl.activeSnapshotWorker.records.length
             if (screenshotCount == count)
                 break
         }
         return
     }
     it('should take screenshot by the time page is loaded', async () => {
-        let recordManager = new RecordManager({})
         await recordManager.start({ headless: true })
         await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.waitForInit()
         await waitTillScreenshotEqualToCount(recordManager, 1)
+        if (!recordManager.browserControl.activeSnapshotWorker.records[0].path.includes('.jpeg')) {
+            assert.fail('Output file is not a picture')
+        }
         try {
-            fs.accessSync(recordManager.browserControl.activeSnapshotWorker.pictureRecords[0].path)
+            fs.accessSync(recordManager.browserControl.activeSnapshotWorker.records[0].path)
         } catch (error) {
             assert.fail('Unable to create screenshot correctly in the disk')
         }
 
-    }).timeout(5000)
+    }).timeout(10000)
     it('it should queue multiple screenshot correctly', async () => {
-        let recordManager = new RecordManager({})
         await recordManager.start({ headless: true })
         await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.waitForInit()
         await recordManager.browserControl.activePage.evaluate(async item => {
             for (let i = 0; i < 50; i++) {
-                window.takePictureSnapshot()
+                window.takePictureSnapshot('hello world')
             }
         })
         await waitTillQueueCleared(recordManager)
-        assert.notEqual(recordManager.browserControl.activeSnapshotWorker.pictureRecords.length, 50)
+        assert.notEqual(recordManager.browserControl.activeSnapshotWorker.records.length, 50)
 
-    }).timeout(5000)
+    }).timeout(10000000)
     it('should take screenshot in case the page is changed', async () => {
-        let recordManager = new RecordManager({})
         await recordManager.start({ headless: true })
         await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.waitForInit()
@@ -80,6 +86,7 @@ describe('Resource Manager - Snapshot Worker', () => {
             let ele = document.querySelector('h1')
             ele.innerText = 'sb'
         })
+        await waitTillQueueCleared(recordManager)
         await waitTillScreenshotEqualToCount(recordManager, 2)
 
     }).timeout(10000)

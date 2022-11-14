@@ -20,9 +20,16 @@ class WorkerBase {
      */
     constructor(page) {
         this.page = page
-        this._picQueue = []
+        this._queue = []
         /**@type {WorkerRecordEntry[]} */
-        this.pictureRecords = []
+        this.records = []
+        this._isTakeSnapshot = false
+    }
+    get isTakeSnapshot() {
+        return this._isTakeSnapshot
+    }
+    set isTakeSnapshot(isTake) {
+        this._isTakeSnapshot = isTake
     }
     /**
      * Create a snapshot path under public/temp/componentPic
@@ -40,14 +47,18 @@ class WorkerBase {
      */
     exposeTakeScreenshot() {
         // let doSnapshotOperation = this._snapshotOperation
-        let taskQueue = this._picQueue
-        let records = this.pictureRecords
+        let taskQueue = this._queue
+        let records = this.records
         let page = this.page
         let filePath = this.getNewSnapshotPath()
         let WorkerRecordEntryClass = WorkerRecordEntry
         let mainThread = null
-        async function takeSnapshot(isMainThread = null) {
+        let isTakeSnapshot = this.isTakeSnapshot
+        // let cdpSession = null
+        async function takeSnapshot(sianature = null) {
+            let isMainThread = null
             while (true) {
+
                 if (mainThread == null) {
                     isMainThread = Math.random()
                     mainThread = true
@@ -59,13 +70,34 @@ class WorkerBase {
                     taskQueue.push('')
                     return
                 }
-                taskQueue.push('')
 
                 let snapshotPath
                 try {
-                    snapshotPath = filePath + 'jpeg'
-                    await page.screenshot({ quality: 40, type: 'jpeg', scale: 'css', path: snapshotPath })
-                } catch (error) {
+                    if (isTakeSnapshot) {
+                        //take snapshot
+                        let cdpSession = null
+                        snapshotPath = filePath + 'mhtml'
+                        if (cdpSession == null) {
+                            cdpSession = await page.target().createCDPSession();
+                            await cdpSession.send('Page.enable');
+                        }
+                        let mHtmlData = null
+                        try {
+                            const { data } = await cdpSession.send('Page.captureSnapshot');
+                            mHtmlData = data
+                        } catch (error) {
+                            cdpSession = await page.target().createCDPSession();
+                            await cdpSession.send('Page.enable');
+                        }
+                        fs.writeFile(snapshotPath, mHtmlData)
+                    } else {
+                        //take screenshot instead
+                        snapshotPath = filePath + 'jpeg'
+                        await page.screenshot({ quality: 40, type: 'jpeg', scale: 'css', path: snapshotPath })
+                    }
+                }
+
+                catch (error) {
                     console.log(error)
                 }
                 let entry = new WorkerRecordEntryClass('', snapshotPath)
