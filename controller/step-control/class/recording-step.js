@@ -25,20 +25,18 @@ class RecordingStep {
     * @param {boolean} recordingStep.isRequiredReview
     * @param {boolean} recordingStep.isRequiredLocatorUpdate
     * @param {boolean} recordingStep.isRequiredNewNameAndLocator
+    * @param {number} recordingStep.snapshotIndex
+    * @param {DOMRect} recordingStep.pos
      */
     constructor(recordingStep) {
+        this.pos = recordingStep.pos
         this.command = recordingStep.command
         this.target = recordingStep.target
         /** @type {Array<string>} */
         this.iframe = recordingStep.iframe
-        if (typeof (recordingStep.iframe) == 'string') {
-            this.iframe = JSON.parse(recordingStep.iframe)
-        }
-
-
         this.potentialMatch = recordingStep.potentialMatch
         this.framePotentialMatch = recordingStep.framePotentialMatch
-        this.snapshotIndex = 0
+        this.snapshotIndex = recordingStep.snapshotIndex
         this.snapshotPath = recordingStep.snapshotPath
         this.targetInnerText = recordingStep.targetInnerText
         this.targetPicPath = recordingStep.targetPicPath

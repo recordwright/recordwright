@@ -1,5 +1,6 @@
 const RecordManager = require('../../../controller/record-manager')
 const RecordWrightBackend = require('../../support/recordwright-backend')
+const { waitTillScreenshotEqualToCount, waitTillSnapshotQueueCleared } = require('./support')
 const assert = require('assert')
 const Locator = require('../../sample-project/recordwright-locator')
 const fs = require('fs')
@@ -21,21 +22,36 @@ describe('Resource Manager - logCurrentElement', () => {
         this.timeout(60000)
     })
 
-    it('should log element with predefined locator', async () => {
-        // await recordManager.start({ headless: true })
-        // await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
-        // await recordManager.waitForInit()
-        // await waitTillScreenshotEqualToCount(recordManager, 1)
-        // if (!recordManager.browserControl.activeSnapshotWorker.records[0].path.includes('.jpeg')) {
-        //     assert.fail('Output file is not a picture')
-        // }
-        // await new Promise(resolve => setTimeout(resolve, 100))
-        // try {
-        //     fs.accessSync(recordManager.browserControl.activeSnapshotWorker.records[0].path)
-        // } catch (error) {
-        //     assert.fail('Unable to create screenshot correctly in the disk')
-        // }
-
+    it('should log element with undefined locator', async () => {
+        await recordManager.start({ headless: true })
+        await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
+        await recordManager.waitForInit()
+        await waitTillScreenshotEqualToCount(recordManager, 1)
+        let btnGetStarted = await recordManager.browserControl.activePage.locator('//h1')
+        await btnGetStarted.hover()
+        await new Promise(resolve => setTimeout(resolve, 50))
+        let ele = recordManager.stepControl.hoveredElement
+        assert.equal(ele.targetInnerText, 'todos')
+        assert.equal(ele.pos.x, 820)
+        assert.notEqual(ele.target, '')
+        assert.equal(ele.snapshotIndex, 0)
+        assert.equal(ele.potentialMatch.length, 0)
     }).timeout(10000)
-
+    it('should log element with defined locator', async () => {
+        await recordManager.start({ headless: true })
+        await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
+        await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
+        let btnGetStarted = await recordManager.browserControl.activePage.locator(Locator['input'].locator)
+        await btnGetStarted.hover()
+        await new Promise(resolve => setTimeout(resolve, 50))
+        let ele = recordManager.stepControl.hoveredElement
+        assert.equal(ele.targetInnerText, '')
+        assert.equal(ele.pos.x, 820)
+        assert.notEqual(ele.target, '')
+        assert.equal(ele.snapshotIndex, 0)
+        assert.equal(ele.potentialMatch.length, 1)
+        assert.equal(ele.potentialMatch[0].path, 'input')
+    }).timeout(10000)
+    it('should log element with multiple defined locator')
+    it('should log element with selected index while there are multiple potential matches')
 })

@@ -3,6 +3,7 @@ let config = require("../../config")
 const BrowserControl = require('../browser-control/index')
 const StepControl = require('../step-control/index')
 const RuntimeSetting = require('./class/record-runtime-setting')
+const RecordingStep = require('../step-control/class/recording-step.js')
 class RecordManager {
     constructor(io) {
         this.io = io
@@ -17,6 +18,28 @@ class RecordManager {
     }
     async start({ headless = false } = {}) {
         await this.browserControl.createBrowserContext({ headless, exposedFunc: this.funcDict })
+    }
+    /**
+     * Convert event detail from browser to RecordingStep
+     * @param {RecordingStep} eventDetail 
+     */
+    convertEventDetailToRecordingStep(eventDetail) {
+        let snapshotIndex = this.browserControl.activeSnapshotWorker.records.length - 1
+        let snapshotPath = this.browserControl.activeSnapshotWorker.records[snapshotIndex].path
+        let framePotentialMatch = eventDetail.potentialMatch.map(index => this.locatorControl.locatorLibrary[index])
+        framePotentialMatch = JSON.parse(JSON.stringify(framePotentialMatch))
+
+        let potentialMatch = eventDetail.potentialMatch.map(index => this.locatorControl.locatorLibrary[index])
+        potentialMatch = JSON.parse(JSON.stringify(potentialMatch))
+
+        let recordingStep = new RecordingStep({
+            ...eventDetail,
+            potentialMatch: potentialMatch,
+            framePotentialMatch: framePotentialMatch,
+            snapshotIndex: snapshotIndex,
+            snapshotPath: snapshotPath,
+        })
+        return recordingStep
     }
     exposeAddStep() {
         let context = this
@@ -233,10 +256,12 @@ class RecordManager {
          */
         async function logCurrentElement(eventDetail) {
             //if current selector has been captured, we will not capture it again
+            try {
+                context.stepControl.hoveredElement = context.convertEventDetailToRecordingStep(eventDetail)
+            } catch (error) {
+                console.log(error)
+            }
 
-            context.stepControl.hoveredElement = eventDetail
-            context.stepControl.hoveredElement.snapshotIndex = lastPictureIndex = context.browserControl.activeSnapshotWorker._queue.length - 1
-            context.stepControl.hoveredElement.snapshotPath = context.browserControl.activeSnapshotWorker._queue[context.stepControl.hoveredElement.snapshotIndex]
 
         }
         return logCurrentElement
