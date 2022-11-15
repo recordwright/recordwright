@@ -3,6 +3,7 @@ const RecordWrightBackend = require('../../support/recordwright-backend')
 const assert = require('assert')
 const Locator = require('../../sample-project/recordwright-locator')
 const fs = require('fs')
+const { waitTillSnapshotQueueCleared, waitTillScreenshotEqualToCount } = require('./support')
 describe('Resource Manager - Snapshot Worker', () => {
     let recordwrightBackend = new RecordWrightBackend()
     let recordManager = new RecordManager({})
@@ -20,35 +21,6 @@ describe('Resource Manager - Snapshot Worker', () => {
             await recordwrightBackend.closeApp()
         this.timeout(60000)
     })
-    /**
-     * 
-     * @param {RecordManager} recordManager 
-     * @returns 
-     */
-    let waitTillQueueCleared = async function (recordManager) {
-        while (true) {
-            await new Promise(resolve => setTimeout(resolve, 100))
-            let queueLength = recordManager.browserControl.activeSnapshotWorker._queue.length
-            if (queueLength == 0)
-                break
-        }
-        return
-    }
-    /**
- * 
- * @param {RecordManager} recordManager 
- * @param {number} count
- * @returns 
- */
-    let waitTillScreenshotEqualToCount = async function (recordManager, count) {
-        while (true) {
-            await new Promise(resolve => setTimeout(resolve, 100))
-            let screenshotCount = recordManager.browserControl.activeSnapshotWorker.records.length
-            if (screenshotCount == count)
-                break
-        }
-        return
-    }
     it('should take screenshot by the time page is loaded', async () => {
         await recordManager.start({ headless: true })
         await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
@@ -74,7 +46,7 @@ describe('Resource Manager - Snapshot Worker', () => {
                 window.takePictureSnapshot('hello world')
             }
         })
-        await waitTillQueueCleared(recordManager)
+        await waitTillSnapshotQueueCleared(recordManager)
         assert.notEqual(recordManager.browserControl.activeSnapshotWorker.records.length, 50)
 
     }).timeout(10000000)
@@ -87,7 +59,7 @@ describe('Resource Manager - Snapshot Worker', () => {
             let ele = document.querySelector('h1')
             ele.innerText = 'sb'
         })
-        await waitTillQueueCleared(recordManager)
+        await waitTillSnapshotQueueCleared(recordManager)
         await waitTillScreenshotEqualToCount(recordManager, 2)
 
     }).timeout(10000)
