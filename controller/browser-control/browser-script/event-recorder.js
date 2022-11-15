@@ -300,7 +300,7 @@ export class BrowserEventRecorder {
 
         if (currentSelectedIndex) {
             event.target.style.backgroundColor = locatorFound
-            // window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, currentSelectedIndex, atomicTreeStr)
+            window.logCurrentElement(targetInfo.output())
             return
         }
 
@@ -308,8 +308,7 @@ export class BrowserEventRecorder {
         //no match mark as no locator found
         if (targetInfo.potentialMatch.length == 0) {
             event.target.style.backgroundColor = noLocatorFound
-            // window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, null, atomicTreeStr)
-            // setStateToAllEvents(true, BLUESTONE.bluestoneIgnoreElement, BLUESTONE.prevDisableStatus)
+            window.logCurrentElement(targetInfo.output())
             // console.log('no potential match index')
             return
         }
@@ -319,13 +318,13 @@ export class BrowserEventRecorder {
         if (targetInfo.potentialMatch.length == 1) {
             //exact one match, we are good
             event.target.style.backgroundColor = locatorFound
-            // window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, 0, atomicTreeStr)
+            window.logCurrentElement(targetInfo.output())
             return
         }
 
         //not found
         event.target.style.backgroundColor = noLocatorFound
-        // window.logCurrentElement(selector, innerText, position.x, position.y, position.height, position.width, iFrame, potentialMatch, framePotentialMatch, null, atomicTreeStr)
+        window.logCurrentElement(targetInfo.output())
 
 
 

@@ -1,12 +1,30 @@
 const Locator = require('../../locator-control/class/Locator')
 const StepResult = require('./step-result')
 const FunctionAST = require('../../function-control/class/Function')
-const HtmlCaptureStatus = require('./HtmlCaptureStatus')
 const fs = require('fs').promises
 const path = require('path')
 class RecordingStep {
     /** 
-     * @param {step} recordingStep 
+     * @param {object} recordingStep 
+     * @param {'click'|'change'|'dblclick'|'keydown'|'goto'|'upload'|'waitForDownloadComplete'|'waitAndHandleForAlert'|'scroll'|'gotoFrame'|'mousedown'|'dragstart'|'mouseup'|'waitElementExists'|'switchTab'|'mouseover'} recordingStep.command
+    * @param {string} recordingStep.target
+    * @param {Array<string>} recordingStep.matchedSelector
+    * @param {number} recordingStep.timeoutMs
+    * @param {string} recordingStep.snapshotPath
+    * @param {string} recordingStep.targetPicPath
+    * @param {Array<string>} recordingStep.iframe
+    * @param {FunctionAST} recordingStep.functionAst
+    * @param {Array<Locator>} recordingStep.potentialMatch
+    * @param {Array<Locator>} recordingStep.framePotentialMatch
+    * @param {number} recordingStep.timestamp
+    * @param {number} recordingStep.currentSelectedIndex
+    * @param {number} recordingStep.scriptLineNumber
+    * @param {string} recordingStep.healingTree
+    * @param {string} recordingStep.finalLocatorName
+    * @param {string} recordingStep.finalLocator
+    * @param {boolean} recordingStep.isRequiredReview
+    * @param {boolean} recordingStep.isRequiredLocatorUpdate
+    * @param {boolean} recordingStep.isRequiredNewNameAndLocator
      */
     constructor(recordingStep) {
         this.command = recordingStep.command
@@ -17,11 +35,11 @@ class RecordingStep {
             this.iframe = JSON.parse(recordingStep.iframe)
         }
 
-        /** @type {Array<Locator>} */
+
         this.potentialMatch = recordingStep.potentialMatch
         this.framePotentialMatch = recordingStep.framePotentialMatch
-        /**@type {Array<string>} path of the html pathes */
-        this.__htmlPath = recordingStep.htmlPath
+        this.snapshotIndex = 0
+        this.snapshotPath = recordingStep.snapshotPath
         this.targetInnerText = recordingStep.targetInnerText
         this.targetPicPath = recordingStep.targetPicPath
         this.timeoutMs = recordingStep.timeoutMs
@@ -34,7 +52,7 @@ class RecordingStep {
         if (recordingStep.finalLocatorName) {
             this.finalLocatorName = recordingStep.finalLocatorName
         }
-        this.finalLocator = ['']
+        this.finalLocator = ''
         if (recordingStep.finalLocator) {
             this.finalLocator = recordingStep.finalLocator
         }
@@ -68,23 +86,14 @@ class RecordingStep {
         return result
     }
     get htmlPath() {
-        return this.__htmlPath
+        return this.snapshotPath
     }
     set htmlPath(path) {
-        this.__htmlPath = path
+        this.snapshotPath = path
     }
     setFinalLocator(finalLocatorName, finalLocator) {
         this.finalLocatorName = finalLocatorName
         this.finalLocator = finalLocator
-    }
-    /**
-     * Update the html capture and change its index based on its location in htmlCapture repo
-     * @param {Number} offSet 
-     * @param {HtmlCaptureStatus} htmlCaptureRepo 
-     */
-    updateHtmlForStep(offSet, htmlCaptureRepo) {
-        this.htmlPath = htmlCaptureRepo.getHtmlByPath(this.htmlPath, offSet)
-
     }
 }
 /**
