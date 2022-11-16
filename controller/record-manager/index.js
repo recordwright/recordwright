@@ -32,12 +32,34 @@ class RecordManager {
         let potentialMatch = eventDetail.potentialMatch.map(index => this.locatorControl.locatorLibrary[index])
         potentialMatch = JSON.parse(JSON.stringify(potentialMatch))
 
+        //specify final locator
+        let finalLocator = ''
+        let finalLocatorName = ''
+        if (eventDetail.currentSelectedIndex != null) {
+            //if element's final index has been specified, use that
+            let locator = this.locatorControl.locatorLibrary[eventDetail.currentSelectedIndex]
+            finalLocator = locator.Locator
+            finalLocatorName = locator.path
+        }
+        else if (eventDetail.potentialMatch.length == 1) {
+            //specify final locator based on potential match
+            let index = eventDetail.potentialMatch[0]
+            let locator = this.locatorControl.locatorLibrary[index]
+            finalLocator = locator.Locator
+            finalLocatorName = locator.path
+        }
+
+
+        eventDetail.finalLocatorName
+
         let recordingStep = new RecordingStep({
             ...eventDetail,
             potentialMatch: potentialMatch,
             framePotentialMatch: framePotentialMatch,
             snapshotIndex: snapshotIndex,
             snapshotPath: snapshotPath,
+            finalLocator,
+            finalLocatorName
         })
         return recordingStep
     }

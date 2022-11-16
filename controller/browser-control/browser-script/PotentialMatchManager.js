@@ -287,7 +287,9 @@ export class PotentialMatchManager {
         let currentElement = currentElementList[0]
         this.selectedMatches = this.selectedMatches.filter(item => { item.target != currentElement })
         let locatorEntry = new LocatorEntry(currentElement)
-        locatorEntry.updatePotentialMatch([index])
+        locatorEntry.updatePotentialMatch(index)
+
+        this.selectedMatches = this.selectedMatches.filter(item => item.target != currentElement)
 
         this.selectedMatches.push(locatorEntry)
     }
