@@ -1,10 +1,12 @@
 const RecordManager = require('../../../controller/record-manager')
 const RecordWrightBackend = require('../../support/recordwright-backend')
 const assert = require('assert')
-const Locator = require('../../sample-project/recordwright-locator')
+const Locator = require('./files/locator')
+const path = require('path')
 describe('Potential Match Manager', () => {
+    let locatorPath = path.join(__dirname, './files/locator.js')
     let recordwrightBackend = new RecordWrightBackend()
-    let recordManager = new RecordManager({})
+    let recordManager = new RecordManager({ locatorPath: locatorPath })
     before(async function () {
         await recordwrightBackend.launchApp()
         this.timeout(60000)

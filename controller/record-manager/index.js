@@ -5,9 +5,9 @@ const StepControl = require('../step-control/index')
 const RuntimeSetting = require('./class/record-runtime-setting')
 const RecordingStep = require('../step-control/class/recording-step.js')
 class RecordManager {
-    constructor(io) {
+    constructor({ io, locatorPath = null } = {}) {
         this.io = io
-        this.locatorControl = new LocatorControl(config.code.locatorPath)
+        this.locatorControl = new LocatorControl(locatorPath || config.code.locatorPath)
         this.browserControl = new BrowserControl(config.recordwright.use, io)
         this.stepControl = new StepControl()
         this.funcDict = this._initFuncDict()

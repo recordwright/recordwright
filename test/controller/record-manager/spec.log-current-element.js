@@ -2,11 +2,15 @@ const RecordManager = require('../../../controller/record-manager')
 const RecordWrightBackend = require('../../support/recordwright-backend')
 const { waitTillScreenshotEqualToCount, waitTillSnapshotQueueCleared } = require('./support')
 const assert = require('assert')
-const Locator = require('../../sample-project/recordwright-locator')
+const Locator = require('./files/locator')
 const fs = require('fs')
+const path = require('path')
+const config = require('../../../config')
 describe('Resource Manager - logCurrentElement', () => {
     let recordwrightBackend = new RecordWrightBackend()
-    let recordManager = new RecordManager({})
+    let locatorPath = path.join(__dirname, './files/locator.js')
+
+    let recordManager = new RecordManager({ locatorPath: locatorPath })
     before(async function () {
         await recordwrightBackend.launchApp()
         this.timeout(60000)
