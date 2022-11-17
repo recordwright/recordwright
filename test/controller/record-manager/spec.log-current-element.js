@@ -77,7 +77,7 @@ describe('Resource Manager - logCurrentElement', () => {
         assert.equal(ele.potentialMatch[1].path, Locator['paragrah-duplicate-2'].displayName)
         assert.equal(ele.finalLocatorName, '')
         assert.equal(ele.finalLocator, '')
-    }).timeout(100000000)
+    }).timeout(10000)
     it('should log element with selected index while there are multiple potential matches', async () => {
         await recordManager.start({ headless: true })
         await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')

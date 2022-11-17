@@ -1,0 +1,63 @@
+const RecordManager = require('../../../controller/record-manager')
+const RecordWrightBackend = require('../../support/recordwright-backend')
+const { waitTillScreenshotEqualToCount, waitTillSnapshotQueueCleared } = require('./support')
+const assert = require('assert')
+const Locator = require('./files/locator')
+const fs = require('fs')
+const path = require('path')
+const config = require('../../../config')
+describe('Resource Manager - logEvent- Switch Context', () => {
+    let recordwrightBackend = new RecordWrightBackend()
+    let locatorPath = path.join(__dirname, './files/locator.js')
+
+    let recordManager = new RecordManager({ locatorPath: locatorPath })
+    before(async function () {
+        await recordwrightBackend.launchApp()
+        this.timeout(60000)
+
+    })
+    afterEach(async function () {
+        await recordManager.browserControl.closeAllInstances()
+        this.timeout(60000)
+    })
+    after(async function () {
+        if (recordManager.browserControl)
+            await recordwrightBackend.closeApp()
+        this.timeout(60000)
+    })
+
+    it('should swith browser context correctly', async () => {
+        // await recordManager.start({ headless: true })
+        // await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
+        // await recordManager.waitForInit()
+        // await waitTillScreenshotEqualToCount(recordManager, 1)
+        // let btnGetStarted = await recordManager.browserControl.activePage.locator('//h1')
+        // await btnGetStarted.hover()
+        // await new Promise(resolve => setTimeout(resolve, 50))
+        // let ele = recordManager.stepControl.hoveredElement
+        // assert.equal(ele.targetInnerText, 'todos')
+        // assert.equal(ele.pos.x, 820)
+        // assert.notEqual(ele.target, '')
+        // assert.equal(ele.snapshotIndex, 0)
+        // assert.equal(ele.potentialMatch.length, 0)
+        // assert.equal(ele.finalLocatorName, '')
+        // assert.equal(ele.finalLocator, '')
+    }).timeout(10000)
+    it('should not record additional step if we stay in the same page', async () => {
+        // await recordManager.start({ headless: true })
+        // await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
+        // await recordManager.waitForInit()
+        // await waitTillScreenshotEqualToCount(recordManager, 1)
+        // let btnGetStarted = await recordManager.browserControl.activePage.locator('//h1')
+        // await btnGetStarted.hover()
+        // await new Promise(resolve => setTimeout(resolve, 50))
+        // let ele = recordManager.stepControl.hoveredElement
+        // assert.equal(ele.targetInnerText, 'todos')
+        // assert.equal(ele.pos.x, 820)
+        // assert.notEqual(ele.target, '')
+        // assert.equal(ele.snapshotIndex, 0)
+        // assert.equal(ele.potentialMatch.length, 0)
+        // assert.equal(ele.finalLocatorName, '')
+        // assert.equal(ele.finalLocator, '')
+    }).timeout(10000)
+})
