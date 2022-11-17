@@ -93,13 +93,21 @@ class BrowserControl {
         await this._activePage.addInitScript(initFunc, currentUrl)
 
         //expose function from all over the places
+        this._exposeFunctionToBrowser(exposedFunc, this._activePage)
+        //-----------------------main func complete---------------
+        this.initCompleted = true
+    }
+    /**
+     * Expose function to browser
+     * @param {Function[]} exposedFunc 
+     * @param {import('playwright').Page} activePage 
+     */
+    async _exposeFunctionToBrowser(exposedFunc, activePage) {
         this.exposedFunc = exposedFunc
         this.exposedFunc['takePictureSnapshot'] = this.activeSnapshotWorker.exposeTakeScreenshot()
         for (let funcName of Object.keys(this.exposedFunc)) {
-            await this._activePage.exposeFunction(funcName, this.exposedFunc[funcName])
+            await activePage.exposeFunction(funcName, this.exposedFunc[funcName])
         }
-        //-----------------------main func complete---------------
-        this.initCompleted = true
     }
     /**
      * Wait till potential match manager populated
