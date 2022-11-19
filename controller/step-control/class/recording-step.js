@@ -65,6 +65,7 @@ class RecordingStep {
         }
         this.scriptLineNumber = recordingStep.scriptLineNumber
         this.healingTree = recordingStep.healingTree
+        this.recommendedLocators = []
     }
     /**
      * //based on the searalized json file, re-create object

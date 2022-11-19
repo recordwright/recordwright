@@ -1,7 +1,7 @@
 import { getXPath } from 'http://localhost:3600/resource/js/getXPath.js';
 import { getElementPos } from "http://localhost:3600/resource/js/getElementPosition.js";
 import { PotentialMatchManager } from "http://localhost:3600/resource/js/PotentialMatchManager.js";
-import { findRobustLocatorForSelector } from "http://localhost:3600/resource/js/robustLocatorGen.js";
+import { LocatorBackupManager } from "http://localhost:3600/resource/js/LocatorBackupManager.js";
 class HoverElementEntry {
     /**
      * @param {HTMLElement} element 
@@ -144,6 +144,8 @@ class HoverElementManager {
 }
 export class BrowserEventRecorder {
     constructor() {
+        /**@type {import('./LocatorBackupManager').LocatorBackupManager} */
+        this.locatorBackupManager = new LocatorBackupManager
         /**@type {import('./PotentialMatchManager').PotentialMatchManager} */
         this.potentialMatchManager = new PotentialMatchManager()
         this.browserIndex = null
@@ -329,9 +331,12 @@ export class BrowserEventRecorder {
             return
         }
 
-        //not found
+        //not found        
         event.target.style.backgroundColor = noLocatorFound
         window.logCurrentElement(targetInfo.output())
+        if (command == null) {
+            this.locatorBackupManager.getLocatorBackup(event.target)
+        }
 
 
 

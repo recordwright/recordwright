@@ -18,5 +18,17 @@ class StepControl {
     set hoveredElement(targetElement) {
         this._hoveredElement = targetElement
     }
+    /**
+     * update recommended locator for current selected element
+     * @returns 
+     */
+    exposeUpdateRecommendedLocators() {
+        let context = this
+        function updateRecommendedLocators(recommendedLocator) {
+            context._hoveredElement.recommendedLocators = recommendedLocator
+        }
+        return updateRecommendedLocators
+    }
+
 }
 module.exports = StepControl

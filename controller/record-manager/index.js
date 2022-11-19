@@ -203,7 +203,8 @@ class RecordManager {
             setActiveLocator: this.locatorControl.exposeSetActiveLocator(),
             getActiveSelectors: this.locatorControl.exposeGetActiveSelectors(),
             getDefinedLocator: this.locatorControl.exposeGetDefinedLocator(),
-            logCurrentElement: this.exposeLogCurrentElement()
+            logCurrentElement: this.exposeLogCurrentElement(),
+            updateRecommendedLocators: this.stepControl.exposeUpdateRecommendedLocators()
         }
     }
 
