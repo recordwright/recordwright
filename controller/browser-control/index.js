@@ -60,6 +60,7 @@ class BrowserControl {
         }
         let context = await this.browser.newContext(launchOption)
         this.activeContext = context
+        let contextIndex = this.browser.contexts().length - 1
 
         this._activePage = await this.activeContext.newPage(this.browserConfig)
         this.activeSnapshotWorker = new SnapshotWorker(this._activePage)
@@ -68,12 +69,13 @@ class BrowserControl {
         let currentUrl = `http://localhost:${config.app.port}/resource/js/index.js`
 
         //create init function. We cannot put it in the other class because it will throw error
-        let initFunc = async function (currentUrl) {
+        let initFunc = async function (input) {
+            let { currentUrl, contextIndex } = JSON.parse(input)
             console.log(`Load Information from ${currentUrl}`)
-
+            //wait till document is ready and inject event recorder script
             while (true) {
                 if (document != null && document.body != null) break
-                await new Promise(resolve => setTimeout(resolve, 10))
+                await new Promise(resolve => setTimeout(resolve, 5))
             }
             try {
                 //add script block
@@ -87,13 +89,24 @@ class BrowserControl {
                 console.log('Error During Browser Event Recorder Injection')
                 console.log(error)
             }
+            //wait till event recorder element is initialized
+            while (true) {
+                if (window.eventRecorder == null) {
+                    await new Promise(resolve => setTimeout(resolve, 5))
+                    continue
+                }
+                /**@type {import('./browser-script/event-recorder').BrowserEventRecorder} */
+                let eventRecorder = window.eventRecorder
+                eventRecorder.setBrowserIndex(contextIndex)
+                break
+            }
 
 
         }
-        await this._activePage.addInitScript(initFunc, currentUrl)
+        await this._activePage.addInitScript(initFunc, JSON.stringify({ currentUrl, contextIndex }))
 
         //expose function from all over the places
-        this._exposeFunctionToBrowser(exposedFunc, this._activePage)
+        await this._exposeFunctionToBrowser(exposedFunc, this._activePage)
         //-----------------------main func complete---------------
         this.initCompleted = true
     }

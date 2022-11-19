@@ -1,6 +1,7 @@
 import { getXPath } from 'http://localhost:3600/resource/js/getXPath.js';
 import { getElementPos } from "http://localhost:3600/resource/js/getElementPosition.js";
 import { PotentialMatchManager } from "http://localhost:3600/resource/js/PotentialMatchManager.js";
+import { findRobustLocatorForSelector } from "http://localhost:3600/resource/js/robustLocatorGen.js";
 class HoverElementEntry {
     /**
      * @param {HTMLElement} element 
@@ -142,17 +143,22 @@ class HoverElementManager {
 
 }
 export class BrowserEventRecorder {
-    /**
-     *      
-     * @param {number} browserIndex
-     */
-    constructor(browserIndex) {
+    constructor() {
         /**@type {import('./PotentialMatchManager').PotentialMatchManager} */
         this.potentialMatchManager = new PotentialMatchManager()
-        this.browserIndex = browserIndex
+        this.browserIndex = null
         this.hoverManager = new HoverElementManager()
         /**@type {TargetInfo} */
         this.mouseOverTargetInfo = null
+        this.robustLocatorPreference = null
+    }
+    setRobustLocatorPreference() { }
+    /**
+     * set browser index for element
+     * @param {number} index 
+     */
+    setBrowserIndex(index) {
+        this.browserIndex = index
     }
     /**
      * based on event inforamtion, calculate relative x y in percentage.
@@ -184,7 +190,7 @@ export class BrowserEventRecorder {
     /**
      * @param {Event} event 
      */
-    handleBrowserAction(event, command) {
+    async handleBrowserAction(event, command) {
         //if the target is whole document, we will redirect it to body because document does not have
         //.getAttribute function. It will cause problem
         let targetElement = event.target
@@ -243,7 +249,8 @@ export class BrowserEventRecorder {
                     default:
                         //if we see combo key ctrl-q, we will call in-browser plugin
                         if ((event.ctrlKey || event.altKey) && event.key === 'q') {
-                            // captureHtml('alt+q')
+                            findRobustLocatorForSelector(event.target, [])
+                            await window.takePictureSnapshot()
                             command = null
                             parameter = null
                             // window.stopRecording()
