@@ -1,7 +1,7 @@
 class Locator {
     /**
      * 
-     * @param {Array<string>} locator 
+     * @param {string} locator 
      * @param {string} screenshot 
      * @param {string} displayName 
      * @param {Array<string>} snapshot

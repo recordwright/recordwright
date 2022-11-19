@@ -18,11 +18,11 @@ let config = {
     },
     bluestoneJson: process.env.bluestonePath || path.join(__dirname, './test/sample-project/recordwright.json'),
     code: {
-        funcPath: path.join(__dirname, './test/sample-project/bluestone-func.js'),
+        userFuncPath: path.join(__dirname, './test/sample-project/recordwright-func.js'),
         locatorPath: path.join(__dirname, './test/sample-project/bluestone-locator.js'),
         scriptFolder: path.join(__dirname, './test/sample-project/script'),
         configPath: path.join(__dirname, './test/sample-project/config.js'),
-        inbuiltFuncPath: path.join(__dirname, './function/rw-func.js'),
+        inbuiltFuncPath: path.join(__dirname, './rwLibrary/recordwright-func.js'),
         pictureFolder: path.join(__dirname, './test/sample-project/componentPic'),
         locatorSnapshotFolder: path.join(__dirname, './test/sample-project/componentPic'),
         urlBlackList: [],
@@ -44,7 +44,7 @@ function configFunc() {
     let projectInfo = fs.readFileSync(config.bluestoneJson)
     let projectObj = JSON.parse(projectInfo.toString())
     let projectFolder = path.dirname(config.bluestoneJson)
-    config.code.funcPath = path.join(projectFolder, projectObj.function)
+    config.code.userFuncPath = path.join(projectFolder, projectObj.function)
     config.code.locatorPath = path.join(projectFolder, projectObj.locator)
     config.code.scriptFolder = path.join(projectFolder, projectObj.test)
     config.code.configPath = path.join(projectFolder, projectObj.config)

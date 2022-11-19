@@ -1,7 +1,7 @@
 
 const { test, Page, Frame } = require('@playwright/test')
-const ElementSelector = require('../../../rwLibrary/class/ElementSelector')
-const RecordwrightFunc = require('../../../rwLibrary/class/RecordwrightFunc')
+const ElementSelector = require('../class/ElementSelector')
+const RecordwrightFunc = require('../class/RecordwrightFunc')
 /**
  * Click UI Element at against coordaination
  * @param {Object} input

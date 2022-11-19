@@ -1,4 +1,4 @@
-let { click } = require('./function/click')
+let { click1 } = require('./function/click1')
 module.exports = {
-    click
+    click1
 }

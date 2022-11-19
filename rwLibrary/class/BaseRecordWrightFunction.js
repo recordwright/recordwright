@@ -1,12 +1,22 @@
 const { test } = require('@playwright/test')
 class BasePlayWrightFunction {
     /**
-     * Make current function visible when specified locator all appear
-     * @returns {string[]}
+     * 
+     * @param {object} input keep getLocator as reserved keyword 
      */
+    constructor(input) {
+        try {
+            this.init()
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    init() {
+        this.locators = [{ locator: ['invalid_locator'] }]
+        this.log = ''
+    }
     async getLocator() {
-        console.log(`getLocator Function is not implemented`)
-        test.fail()
+        return this.locators
     }
     async func() {
         throw new Error('This function has not been implemented')
@@ -16,14 +26,16 @@ class BasePlayWrightFunction {
         await test.step(logInfo, async () => {
             await this.func(this.input)
         })
+        console.log('hello world!')
     }
     /**
-     * This is step information for current operation
-     * @returns {string}
+     * This is step information for curren toperation
      */
     async getLog() {
-        console.log(`getLog Function is not implemented`)
-        test.fail()
+        if (this.log == '' || this.log == null)
+            return null
+        else
+            return this.log
     }
     /**
      * based on the information, perform opeartion

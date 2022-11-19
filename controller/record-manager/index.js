@@ -1,5 +1,5 @@
 const LocatorControl = require('../locator-control')
-let config = require("../../config")
+const config = require("../../config")
 const BrowserControl = require('../browser-control/index')
 const StepControl = require('../step-control/index')
 const RuntimeSetting = require('./class/record-runtime-setting')
@@ -7,19 +7,22 @@ const RecordingStep = require('../step-control/class/recording-step.js')
 const FunctionControl = require('../function-control/index')
 class RecordManager {
     constructor({
-        io, locatorPath = config.code.locatorPath,
+        io,
+        locatorPath = config.code.locatorPath,
         inbuiltFuncPath = config.code.inbuiltFuncPath,
-        userFuncPath = config.code.funcPath
+        userFuncPath = config.code.userFuncPath
     } = {}) {
+
         this.io = io
         this.locatorControl = new LocatorControl(locatorPath)
         this.browserControl = new BrowserControl(config.recordwright.use, io)
         this.stepControl = new StepControl()
         this.funcDict = this._initFuncDict()
         this.runtimeSetting = new RuntimeSetting()
-        // this.functionControl = new FunctionControl(locatorPath)
-        // this.functionControl.store.loadFunctions(inbuiltFuncPath)
-        // this.functionControl.store.loadFunctions(userFuncPath)
+        this.functionControl = new FunctionControl(locatorPath)
+
+        this.functionControl.store.loadFunctions(inbuiltFuncPath)
+        this.functionControl.store.loadFunctions(userFuncPath)
     }
     async waitForInit() {
         await this.browserControl.waitForInit()
