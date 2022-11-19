@@ -1,7 +1,7 @@
 import { getXPath } from 'http://localhost:3600/resource/js/getXPath.js';
 import { getElementPos } from "http://localhost:3600/resource/js/getElementPosition.js";
 import { PotentialMatchManager } from "http://localhost:3600/resource/js/PotentialMatchManager.js";
-import { LocatorBackupManager } from "http://localhost:3600/resource/js/LocatorBackupManager.js";
+import { LocatorRecommendationManager } from "http://localhost:3600/resource/js/LocatorRecommendationManager.js";
 class HoverElementEntry {
     /**
      * @param {HTMLElement} element 
@@ -143,9 +143,11 @@ class HoverElementManager {
 
 }
 export class BrowserEventRecorder {
-    constructor() {
-        /**@type {import('./LocatorBackupManager').LocatorBackupManager} */
-        this.locatorBackupManager = new LocatorBackupManager
+
+    constructor(EVENTCONST) {
+        this.EVENTCONST = EVENTCONST
+        /**@type {import('./LocatorRecommendationManager').LocatorRecommendationManager} */
+        this.locatorRecommendationManager = new LocatorRecommendationManager([])
         /**@type {import('./PotentialMatchManager').PotentialMatchManager} */
         this.potentialMatchManager = new PotentialMatchManager()
         this.browserIndex = null
@@ -205,7 +207,7 @@ export class BrowserEventRecorder {
         let fileNames = []
 
         switch (command) {
-            case EVENTCONST.visibilitychange:
+            case this.EVENTCONST.visibilitychange:
                 if (document.visibilityState == 'hidden') return
                 //in edit mode, we saw an situation where a swap tab operation is added at the end
                 // we will normally land in about:blank page when we are coming from edit mode
@@ -218,17 +220,17 @@ export class BrowserEventRecorder {
                 })
                 command = 'switchTab'
                 break
-            case EVENTCONST.click:
+            case this.EVENTCONST.click:
                 // console.log(`frame Position: ${JSON.stringify(framePosition)} absolute position: ${JSON.stringify(position)}, clientX,y: ${event.clientX},${event.clientY}`)
-                parameter = getRelativeXYCoordination(event)
+                parameter = this.getRelativeXYCoordination(event)
                 break
-            case EVENTCONST.mousedown:
-                parameter = getRelativeXYCoordination(event)
+            case this.EVENTCONST.mousedown:
+                parameter = this.getRelativeXYCoordination(event)
                 break
-            case EVENTCONST.mouseup:
-                parameter = getRelativeXYCoordination(event)
+            case this.EVENTCONST.mouseup:
+                parameter = this.getRelativeXYCoordination(event)
                 break
-            case EVENTCONST.change:
+            case this.EVENTCONST.change:
                 //still use original target because the new target may not have value
                 parameter = targetElement.value
                 //handle file upload through input
@@ -238,7 +240,7 @@ export class BrowserEventRecorder {
                     parameter = fileNames
                 }
                 break;
-            case EVENTCONST.keydown:
+            case this.EVENTCONST.keydown:
                 //currently, we only support enter and esc key
                 parameter = event.code
                 switch (parameter) {
@@ -251,21 +253,20 @@ export class BrowserEventRecorder {
                     default:
                         //if we see combo key ctrl-q, we will call in-browser plugin
                         if ((event.ctrlKey || event.altKey) && event.key === 'q') {
-                            findRobustLocatorForSelector(event.target, [])
                             await window.takePictureSnapshot()
                             command = null
                             parameter = null
                             // window.stopRecording()
                             this.potentialMatchManager.setActiveLocator()
                             // captureScreenshot('alt+q')
-                            console.log('call in-browser spy' + JSON.stringify(position))
+                            console.log('call in-browser spy' + JSON.stringify(targetInfo.position))
                             break
                         }
                         //otherwise, we are not going to record any other operation
                         return
                 }
                 break;
-            case EVENTCONST.scroll:
+            case this.EVENTCONST.scroll:
                 parameter = JSON.stringify({
                     y: targetElement.scrollTop,
                     x: targetElement.scrollLeft
@@ -281,10 +282,13 @@ export class BrowserEventRecorder {
         // new CustomEvent('eventDetected', { detail: eventDetail });
         //will only log event from visible behavior except for file upload
         //file upload could trigger another element
-        if ((position.height > 0 && position.width > 0) || command == 'upload' || command == null) {
+        if ((targetInfo.position.height > 0 && targetInfo.position.width > 0) || command == 'upload' || command == null) {
             window.logEvent(eventDetail)
         }
         console.log(targetInfo)
+        if (command == null) {
+            this.locatorRecommendationManager.getLocatorBackup(event.target)
+        }
         // console.log(JSON.stringify(event))
     }
     /**
@@ -334,9 +338,7 @@ export class BrowserEventRecorder {
         //not found        
         event.target.style.backgroundColor = noLocatorFound
         window.logCurrentElement(targetInfo.output())
-        if (command == null) {
-            this.locatorBackupManager.getLocatorBackup(event.target)
-        }
+
 
 
 

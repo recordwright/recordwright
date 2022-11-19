@@ -4,14 +4,22 @@ const BrowserControl = require('../browser-control/index')
 const StepControl = require('../step-control/index')
 const RuntimeSetting = require('./class/record-runtime-setting')
 const RecordingStep = require('../step-control/class/recording-step.js')
+const FunctionControl = require('../function-control/index')
 class RecordManager {
-    constructor({ io, locatorPath = null } = {}) {
+    constructor({
+        io, locatorPath = config.code.locatorPath,
+        inbuiltFuncPath = config.code.inbuiltFuncPath,
+        userFuncPath = config.code.funcPath
+    } = {}) {
         this.io = io
-        this.locatorControl = new LocatorControl(locatorPath || config.code.locatorPath)
+        this.locatorControl = new LocatorControl(locatorPath)
         this.browserControl = new BrowserControl(config.recordwright.use, io)
         this.stepControl = new StepControl()
         this.funcDict = this._initFuncDict()
         this.runtimeSetting = new RuntimeSetting()
+        // this.functionControl = new FunctionControl(locatorPath)
+        // this.functionControl.store.loadFunctions(inbuiltFuncPath)
+        // this.functionControl.store.loadFunctions(userFuncPath)
     }
     async waitForInit() {
         await this.browserControl.waitForInit()
@@ -22,8 +30,10 @@ class RecordManager {
     /**
      * Convert event detail from browser to RecordingStep
      * @param {RecordingStep} eventDetail 
+     * @param {string} backupTargetLocator
+     * @param {number} lastOperationTime
      */
-    convertEventDetailToRecordingStep(eventDetail) {
+    convertEventDetailToRecordingStep(eventDetail, backupTargetLocator = '', lastOperationTime = Date.now()) {
         let snapshotIndex = this.browserControl.activeSnapshotWorker.records.length - 1
         let snapshotPath = this.browserControl.activeSnapshotWorker.records[snapshotIndex].path
         let framePotentialMatch = eventDetail.potentialMatch.map(index => this.locatorControl.locatorLibrary[index])
@@ -49,6 +59,13 @@ class RecordManager {
             finalLocatorName = locator.path
         }
 
+        //in case the element is destroyed after the event, we will get the locator from last hovered element
+        if (eventDetail.target == null || eventDetail.target == '') {
+            eventDetail.target = backupTargetLocator
+        }
+
+        //update timeout based on last operation time
+        eventDetail.timeoutMs = Date.now() - lastOperationTime
 
         eventDetail.finalLocatorName
 
@@ -82,99 +99,65 @@ class RecordManager {
             }
 
 
-            let recordingStep = context.convertEventDetailToRecordingStep(eventDetail)
-            //handle locator potential match
 
-            //in case the element is destroyed after the event, we will get the locator from last hovered element
-            if (eventDetail.target == null || eventDetail.target == '') {
-                eventDetail.target = recordRepo.operation.browserSelection.currentSelector
-            }
-
-
+            let recordingStep = context.convertEventDetailToRecordingStep(eventDetail, context.stepControl.hoveredElement.target, context.stepControl.lastStepTimeStamp)
             //if event command is null, call the in-browser console
-            if (eventDetail.command == null) {
+            if (recordingStep.command == null) {
+                //bring ui into focus
                 console.log('pause recording and call in-browser agent')
-
-                let task1 = recordRepo.getRecommendedLocatorFromDefiner(recordRepo.operation.browserSelection.currentSelector, eventDetail.iframe)
-                //display pending work progress
-
-                //display mvt console
-                // recordRepo.isCaptureHtml = false
-                await openBluestoneTab(browser, "decide-view")
+                //TODO: implement UI switch operation
+                // await openBluestoneTab(browser, "decide-view")
             }
-            //delayed record. 
-            //normally, if we are in recording state, we will log step anyway
-            //if we are not in recording state, we will still log steps for 5s to avoid missing delayed events
-            if ((recordRepo.isRecording || (Math.abs(recordStopTimeStamp - eventDetail.timestamp) < 5000)) && eventDetail.command != null) {
-                //If we don't have page element, this indicates that it is a non-UI operation,
-                //we will not calculate timeout
-                let timeoutMs = null
-                if (page != null) {
-                    timeoutMs = Date.now() - recordRepo.operation.browserSelection.lastOperationTime
-                }
-                if (eventDetail.timeoutMs == null) {
-                    eventDetail.timeoutMs = timeoutMs
-                }
 
-                //calculate timeout by subtracting current time to the time from previous step
+            //based on record setting decide if we should proceed recording
+            if (!context.runtimeSetting.isAcceptNewStep) return
 
-                eventDetail.targetPicPath = picturePath
-                eventDetail.htmlPath = [htmlPath]
-                eventDetail.potentialMatch = locatorPotentialMatch
-                eventDetail.framePotentialMatch = framePotentialMatch
-                //construct operation event
-                let event = new RecordingStep(eventDetail)
-                try {
-                    let commandFuncAst = recordRepo.astManager.getFunction(event.command)
-                    event.functionAst = commandFuncAst
-                    //parse in argument into parameter
-                    if (eventDetail.parameter != null) {
-                        let paramIndex = event.functionAst.params.findIndex(item => { return item.type.name == 'Number' || item.type.name == 'string' || item.type.name == 'number' || item.type.name == 'Number' })
-                        event.functionAst.params[paramIndex].value = eventDetail.parameter
+            //calculate timeout by subtracting current time to the time from previous step
 
-                        try {
-                            let paramterObj = JSON.parse(eventDetail.parameter)
-                            let paramNameList = Object.keys(paramterObj)
-                            for (const paramName of paramNameList) {
-                                let funcParam = event.functionAst.params.find(funcParam => funcParam.name == paramName)
-                                if (funcParam == null) continue
-                                funcParam.value = paramterObj[paramName]
-                            }
 
-                        } catch (error) {
+            try {
+                let commandFuncAst = recordRepo.astManager.getFunction(event.command)
+                event.functionAst = commandFuncAst
+                //parse in argument into parameter
+                if (eventDetail.parameter != null) {
+                    let paramIndex = event.functionAst.params.findIndex(item => { return item.type.name == 'Number' || item.type.name == 'string' || item.type.name == 'number' || item.type.name == 'Number' })
+                    event.functionAst.params[paramIndex].value = eventDetail.parameter
 
+                    try {
+                        let paramterObj = JSON.parse(eventDetail.parameter)
+                        let paramNameList = Object.keys(paramterObj)
+                        for (const paramName of paramNameList) {
+                            let funcParam = event.functionAst.params.find(funcParam => funcParam.name == paramName)
+                            if (funcParam == null) continue
+                            funcParam.value = paramterObj[paramName]
                         }
 
+                    } catch (error) {
+
                     }
-                } catch (error) {
-                    console.log(`Cannot find command ${event.command}`)
-                }
-                if (eventDetail.currentSelectedIndex) {
-                    let selectedLocator = recordRepo.locatorManager.locatorLibrary[eventDetail.currentSelectedIndex]
-                    event.finalLocatorName = selectedLocator.path
-                    event.finalLocator = selectedLocator.Locator
-                }
 
-
-                await recordRepo.addStep(event)
-                //bring up notification on bluestone if there is more than 1 potential match
-                //or the final element has not been set
-                let isElementDefined = event.potentialMatch.length == 1 || event.finalLocatorName != ''
-                if (!isElementDefined) {
-                    recordRepo.puppeteer.sendUndefinedLocatorNotification()
                 }
-
-                // console.log(JSON.stringify(recordRepo.steps))
-                //update last operation time
+            } catch (error) {
+                console.log(`Cannot find command ${event.command}`)
+            }
+            if (eventDetail.currentSelectedIndex) {
+                let selectedLocator = recordRepo.locatorManager.locatorLibrary[eventDetail.currentSelectedIndex]
+                event.finalLocatorName = selectedLocator.path
+                event.finalLocator = selectedLocator.Locator
             }
 
-            // setTimeout(() => {
-            //     try {
-            //         if (io) io.emit(WorkflowRecord.inbuiltEvent.refresh)
-            //     } catch (error) {
-            //         console.log(error)
-            //     }
-            // }, 800);
+
+            await recordRepo.addStep(event)
+            //bring up notification on bluestone if there is more than 1 potential match
+            //or the final element has not been set
+            let isElementDefined = event.potentialMatch.length == 1 || event.finalLocatorName != ''
+            if (!isElementDefined) {
+                recordRepo.puppeteer.sendUndefinedLocatorNotification()
+            }
+
+            // console.log(JSON.stringify(recordRepo.steps))
+            //update last operation time
+
 
 
         }
@@ -204,6 +187,7 @@ class RecordManager {
             getActiveSelectors: this.locatorControl.exposeGetActiveSelectors(),
             getDefinedLocator: this.locatorControl.exposeGetDefinedLocator(),
             logCurrentElement: this.exposeLogCurrentElement(),
+            logEvent: this.exposeLogEvent(),
             updateRecommendedLocators: this.stepControl.exposeUpdateRecommendedLocators()
         }
     }

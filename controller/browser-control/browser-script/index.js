@@ -21,7 +21,7 @@ const EVENTCONST = {
 
 }
 /** @type {import('./event-recorder').BrowserEventRecorder} */
-let eventRecorder = new BrowserEventRecorder()
+let eventRecorder = new BrowserEventRecorder(EVENTCONST)
 window.eventRecorder = eventRecorder
 await eventRecorder.potentialMatchManager.updateBluestoneRegisteredLocator()
 await eventRecorder.potentialMatchManager.scanLocator()

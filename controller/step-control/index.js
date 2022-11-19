@@ -5,9 +5,10 @@ class StepControl {
         this.steps = []
         /** @type {RecordingStep} */
         this._hoveredElement = null
+        this.lastStepTimeStamp = Date.now()
     }
     addStep(step) {
-
+        this.lastStepTimeStamp = Date.now()
     }
     get hoveredElement() {
         return this._hoveredElement

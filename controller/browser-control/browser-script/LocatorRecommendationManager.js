@@ -1,5 +1,5 @@
 import { findRobustLocatorForSelector } from "http://localhost:3600/resource/js/robustLocatorGen.js";
-export class LocatorBackupManager {
+export class LocatorRecommendationManager {
     /**
      * 
      * @param {string[]} locatorPriority 

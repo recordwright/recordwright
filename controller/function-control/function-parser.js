@@ -13,7 +13,7 @@ class AST {
      * 
      * @param {string} locatorPath the path of the locator summary
      */
-    constructor(locatorPath, funcPath) {
+    constructor(locatorPath) {
         this.__locatorPath = locatorPath
         /** @type {Array<FunctionAST>} */
         this.__funcRepo = []
