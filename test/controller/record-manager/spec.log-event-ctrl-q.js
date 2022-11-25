@@ -1,6 +1,6 @@
 const RecordManager = require('../../../controller/record-manager')
 const RecordWrightBackend = require('../../support/recordwright-backend')
-const { waitTillScreenshotEqualToCount, waitTillSnapshotQueueCleared } = require('./support')
+const { waitForGetRecommendedLocator, callInBrowserSpy } = require('./support')
 const assert = require('assert')
 const Locator = require('./files/locator')
 const fs = require('fs')
@@ -30,10 +30,9 @@ describe('Resource Manager - logEvent - getRecommendedLocator', () => {
         await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
         let btnGetStarted = await recordManager.browserControl.activePage.locator(Locator['input'].locator)
-        await btnGetStarted.hover()
-        await new Promise(resolve => setTimeout(resolve, 50))
-        await recordManager.browserControl.activePage.keyboard.press('Control+Q')
-        await new Promise(resolve => setTimeout(resolve, 1000000))
-        recordManager.stepControl.hoveredElement.recommendedLocators
-    }).timeout(1000000)
+        await callInBrowserSpy(btnGetStarted)
+        let recommendedLocatorCount = await waitForGetRecommendedLocator(recordManager)
+        assert.notEqual(recommendedLocatorCount, 0, 'recommended locator should not be equal 0')
+
+    }).timeout(100000)
 })

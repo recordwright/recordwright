@@ -24,8 +24,8 @@ export class LocatorRecommendationManager {
         window.updateRecommendedLocators(result)
         result = ''
         this.endTime = Date.now()
-        this.elapsedTimeList = endTime - startTime
-        this.elapsedTimeList.push(this.elapsedTimeList)
+        
+        this.elapsedTimeList.push(this.endTime - this.startTime)
         this.backupGenOngoing = false
 
     }

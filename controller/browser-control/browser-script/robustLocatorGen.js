@@ -1379,7 +1379,7 @@ This function is the final one to have all functions above and output the correc
 
 function locatorSummaryByMultiElemsMultiAttrs(targetElement, userPriority) {
     let elementsCombinationsFinal
-    let locatorSummary
+    let locatorSummary, locatorSummaryAfterFiltering
 
     elementsCombinationsFinal = createFinalXpathListForTargetSelector(targetElement, userPriority)
     locatorSummary = furtherCombineAllPossibleXpath(elementsCombinationsFinal)

@@ -26,7 +26,7 @@ class StepControl {
     exposeUpdateRecommendedLocators() {
         let context = this
         function updateRecommendedLocators(recommendedLocator) {
-            context._hoveredElement.recommendedLocators = recommendedLocator
+            context._hoveredElement.recommendedLocators = recommendedLocator.map(item => item.locator)
         }
         return updateRecommendedLocators
     }

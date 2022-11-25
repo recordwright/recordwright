@@ -72,6 +72,34 @@ class RecordManager {
 
         eventDetail.finalLocatorName
 
+
+
+        //associate function ast 
+        try {
+            let commandFuncAst = this.functionControl.store.getFunction(eventDetail.command)
+            eventDetail.functionAst = commandFuncAst
+            //parse in argument into parameter
+            if (eventDetail.parameter != null) {
+                let paramIndex = eventDetail.functionAst.params.findIndex(item => { return item.type.name == 'Number' || item.type.name == 'string' || item.type.name == 'number' || item.type.name == 'Number' })
+                eventDetail.functionAst.params[paramIndex].value = eventDetail.parameter
+
+                try {
+                    let paramterObj = JSON.parse(eventDetail.parameter)
+                    let paramNameList = Object.keys(paramterObj)
+                    for (const paramName of paramNameList) {
+                        let funcParam = eventDetail.functionAst.params.find(funcParam => funcParam.name == paramName)
+                        if (funcParam == null) continue
+                        funcParam.value = paramterObj[paramName]
+                    }
+
+                } catch (error) {
+
+                }
+
+            }
+        } catch (error) {
+            console.log(`Cannot find command ${eventDetail.command}`)
+        }
         let recordingStep = new RecordingStep({
             ...eventDetail,
             potentialMatch: potentialMatch,
@@ -118,48 +146,9 @@ class RecordManager {
             //calculate timeout by subtracting current time to the time from previous step
 
 
-            try {
-                let commandFuncAst = recordRepo.astManager.getFunction(event.command)
-                event.functionAst = commandFuncAst
-                //parse in argument into parameter
-                if (eventDetail.parameter != null) {
-                    let paramIndex = event.functionAst.params.findIndex(item => { return item.type.name == 'Number' || item.type.name == 'string' || item.type.name == 'number' || item.type.name == 'Number' })
-                    event.functionAst.params[paramIndex].value = eventDetail.parameter
 
-                    try {
-                        let paramterObj = JSON.parse(eventDetail.parameter)
-                        let paramNameList = Object.keys(paramterObj)
-                        for (const paramName of paramNameList) {
-                            let funcParam = event.functionAst.params.find(funcParam => funcParam.name == paramName)
-                            if (funcParam == null) continue
-                            funcParam.value = paramterObj[paramName]
-                        }
+            await context.stepControl.addStep(recordingStep)
 
-                    } catch (error) {
-
-                    }
-
-                }
-            } catch (error) {
-                console.log(`Cannot find command ${event.command}`)
-            }
-            if (eventDetail.currentSelectedIndex) {
-                let selectedLocator = recordRepo.locatorManager.locatorLibrary[eventDetail.currentSelectedIndex]
-                event.finalLocatorName = selectedLocator.path
-                event.finalLocator = selectedLocator.Locator
-            }
-
-
-            await recordRepo.addStep(event)
-            //bring up notification on bluestone if there is more than 1 potential match
-            //or the final element has not been set
-            let isElementDefined = event.potentialMatch.length == 1 || event.finalLocatorName != ''
-            if (!isElementDefined) {
-                recordRepo.puppeteer.sendUndefinedLocatorNotification()
-            }
-
-            // console.log(JSON.stringify(recordRepo.steps))
-            //update last operation time
 
 
 
