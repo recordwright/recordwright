@@ -1,10 +1,10 @@
 const { test } = require('@playwright/test')
 class BasePlayWrightFunction {
     /**
-     * Make current function visible when specified locator all appear
+     * Make current function visible when specified condition is met
      * @returns {string[]}
      */
-    async getLocator() {
+    async isFunctionVisible() {
         console.log(`getLocator Function is not implemented`)
         test.fail()
     }

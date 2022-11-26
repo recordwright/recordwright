@@ -15,6 +15,11 @@ export function getElementByXpath(xpath, source = document) {
     return result
 
 }
+/**
+ * 
+ * @param {HTMLElement} elm 
+ * @returns 
+ */
 export function getXPath(elm) {
     if (elm == null) return ''
     let target = elm
@@ -47,7 +52,18 @@ export function getXPath(elm) {
         };
     };
     let xpath = '//' + segs.join('/')
-    let results = getElementByXpath(xpath)
+
+    //update document context if we are working with iframe
+    let currentDoc = document
+    if (target.tagName == 'IFRAME') {
+        try {
+            currentDoc = window.frameElement.contentWindow.parent.document
+        } catch (error) {
+
+        }
+
+    }
+    let results = getElementByXpath(xpath, currentDoc)
     if (results.length == 1) return xpath
     for (let i = 0; i < results.length; i++) {
         if (results[i] == target) {

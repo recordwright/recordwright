@@ -1,4 +1,4 @@
-const { Locator } = require('playwright')
+const { Locator, Page } = require('playwright')
 const RecordManager = require('../../../controller/record-manager/index')
 /**
  * 
@@ -76,6 +76,25 @@ let waitForGetRecommendedLocator = async function (recordManager) {
     }
     return 0
 }
+/**
+ * @param {Object} input
+ * @param {Page} input.page 
+ * @param {string} input.url
+ * @param {string } input.iframeId
+ */
+let injectIframe = async function ({ page, url = 'https://todomvc.com/examples/angularjs/#/', iframeId = 'rw-iframe' } = {}) {
+    let inputInfo = { url, iframeId }
+    await page.evaluate((input) => {
+        let finderScript = document.createElement("iframe");
+        finderScript.setAttribute('src', input.url)
+        finderScript.setAttribute('id', input.iframeId)
+        document.body.appendChild(finderScript);
+    }, inputInfo)
+}
 module.exports = {
-    waitTillSnapshotQueueCleared, waitTillScreenshotEqualToCount, callInBrowserSpy, waitForGetRecommendedLocator
+    injectIframe,
+    waitTillSnapshotQueueCleared,
+    waitTillScreenshotEqualToCount,
+    callInBrowserSpy,
+    waitForGetRecommendedLocator
 }

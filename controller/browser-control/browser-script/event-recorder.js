@@ -156,6 +156,9 @@ export class BrowserEventRecorder {
         this.mouseOverTargetInfo = null
         this.robustLocatorPreference = null
     }
+    getXPath(element) {
+        return getXPath(element)
+    }
     setRobustLocatorPreference() { }
     /**
      * set browser index for element

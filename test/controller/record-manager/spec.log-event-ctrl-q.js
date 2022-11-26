@@ -26,7 +26,7 @@ describe('Resource Manager - logEvent - getRecommendedLocator', () => {
         this.timeout(60000)
     })
     it('should create recommended locator for specific element on ctrl+q action', async () => {
-        await recordManager.start({ headless: false })
+        await recordManager.start({ headless: true })
         await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
         let btnGetStarted = await recordManager.browserControl.activePage.locator(Locator['input'].locator)
