@@ -1,16 +1,28 @@
 
-const { test, Page, Frame } = require('@playwright/test')
+const { test, Browser, BrowserContext } = require('@playwright/test')
 const ElementSelector = require('../class/ElementSelector')
 const RecordwrightFunc = require('../class/RecordwrightFunc')
+class BringContextToFrontResult {
+    /**
+     * 
+     * @param {BrowserContext} context 
+     */
+    constructor(context) {
+        this.context = context
+        this.page = context.pages()[0]
+        this.frame = this.page.mainFrame()
+
+    }
+}
 /**
- * Click UI Element at against coordaination
+ * Bring browser context to front
  * @param {Object} input
- * @param {Frame} input.frame 
+ * @param {Browser} input.browser 
  * @param {ElementSelector} input.element
- * @param {Number} input.x x-coorindation offset in terms of percentage. Scale of 1
- * @param {Number} input.y x-coorindation offset in terms of percentage. Scale of 1
+ * @param {Number} input.index x-coorindation offset in terms of percentage. Scale of 1
+ * @returns {BringContextToFrontResult}
  */
-exports.click = async function (input) {
+exports.bringPageToFront = async function (input) {
     class mainClass extends RecordwrightFunc {
         async getLog() {
             return `Click in ${input.element.displayName}`
@@ -24,15 +36,13 @@ exports.click = async function (input) {
                 /**
                  * click on element based on the size
                  */
-                let locator = await input.frame.locator(input.element.locator)
-                let rect = await locator.boundingBox()
-                let x = rect.width * input.x
-                let y = rect.height * input.y
-                await locator.click({ position: { x: x, y: y }, force: true })
+                let contextList = input.browser.contexts()
+                let context = contextList[input.index]
+                let result = new BringContextToFrontResult(context)
+                return result
             } catch (error) {
                 return Promise.reject(`Unable to Click Element:${input.element.displayName}    Error: ${error}`)
             }
-            return true
         }
 
     }

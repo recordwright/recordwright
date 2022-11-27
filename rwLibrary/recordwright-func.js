@@ -1,4 +1,7 @@
-let { click } = require('./functions/click')
+const { click } = require('./functions/click')
+const { gotoFrame } = require('./functions/gotoFrame')
+const { waitforElement } = require('./functions/waitforElement')
+const { bringPageToFront } = require('./functions/bringPageToFront')
 module.exports = {
-    click
+    click, gotoFrame, waitforElement, bringPageToFront
 }

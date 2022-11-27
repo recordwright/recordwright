@@ -12,8 +12,8 @@ const RecordwrightFunc = require('../../../rwLibrary/class/RecordwrightFunc')
  */
 exports.click1 = async function (input) {
     class mainClass extends RecordwrightFunc {
-        async getLocator() {
-            return [{ locator: 'invalid_locator' }]
+        async isVisible() {
+            return true
         }
         async getLog() {
             return `Click in ${input.element.displayName}`

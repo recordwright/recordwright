@@ -31,7 +31,6 @@ describe('AST class', () => {
         await astSummary.loadFunctions(funcPath)
         assert.deepEqual(astSummary.funcRepo[0].name, 'click1')
         assert.deepEqual(astSummary.funcRepo[0].description, 'Click UI Element at against coordaination')
-        assert.deepEqual(astSummary.funcRepo[0].locators.length, 1)
         assert.deepEqual(astSummary.funcRepo[0].params.length, 4)
         assert.deepEqual(astSummary.funcRepo[0].params[0].name, 'frame')
         assert.deepEqual(astSummary.funcRepo[0].params[1].name, 'element')

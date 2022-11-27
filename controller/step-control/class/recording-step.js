@@ -26,6 +26,7 @@ class RecordingStep {
     * @param {boolean} recordingStep.isRequiredLocatorUpdate
     * @param {boolean} recordingStep.isRequiredNewNameAndLocator
     * @param {number} recordingStep.snapshotIndex
+    * @param {number} recordingStep.contextIndex
     * @param {DOMRect} recordingStep.pos
      */
     constructor(recordingStep) {
@@ -45,7 +46,7 @@ class RecordingStep {
         this.isRequiredReview = recordingStep.isRequiredReview || false
         this.isRequiredLocatorUpdate = recordingStep.isRequiredLocatorUpdate || false
         this.isRequiredNewNameAndLocator = recordingStep.isRequiredNewNameAndLocator || false
-
+        this.contextIndex = recordingStep.contextIndex
         this.finalLocatorName = ''
         if (recordingStep.finalLocatorName) {
             this.finalLocatorName = recordingStep.finalLocatorName

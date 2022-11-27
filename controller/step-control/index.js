@@ -39,6 +39,6 @@ class StepControl {
         }
         return updateRecommendedLocators
     }
-
+    
 }
 module.exports = StepControl

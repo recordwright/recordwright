@@ -1,12 +1,12 @@
-const { test } = require('@playwright/test')
+const { test, Frame } = require('@playwright/test')
 class BasePlayWrightFunction {
     /**
      * Make current function visible when specified condition is met
-     * @returns {string[]}
+     * @param {Frame}
+     * @returns {boolean}
      */
-    async isFunctionVisible() {
-        console.log(`getLocator Function is not implemented`)
-        test.fail()
+    async isVisible(frame) {
+        return true
     }
     async func() {
         throw new Error('This function has not been implemented')
@@ -35,14 +35,6 @@ class BasePlayWrightFunction {
          * @type {BasePlayWrightFunction}
          */
         let classVar = new className()
-        // if getLocator flag appear, return locator instead of running function
-        if (input.getLocator) {
-            /**
-             * @type {string[]}
-             */
-            let locators = await classVar.getLocator()
-            return locators
-        }
 
         //otherwise, just run function associated with this class
         let result = await classVar.run()

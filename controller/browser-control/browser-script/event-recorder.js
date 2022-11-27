@@ -17,8 +17,9 @@ class TargetInfo {
      * @param {PotentialMatchManager} potentialMatchManager 
      * @param {string} command 
      * @param {HTMLElement} targetElement 
+     * @param {number} contextIndex
      */
-    constructor(potentialMatchManager, command, targetElement) {
+    constructor(potentialMatchManager, command, targetElement, contextIndex) {
         this.potentialMatchManager = potentialMatchManager
         this.command = command
         this.targetElement = targetElement
@@ -32,6 +33,7 @@ class TargetInfo {
         this.targetInnerText = ''
         this.healingTree = '{}'
         this.parameter = ''
+        this.contextIndex = contextIndex
         this.init()
 
     }
@@ -204,7 +206,7 @@ export class BrowserEventRecorder {
         if (event.target == document) {
             targetElement = document.body
         }
-        let targetInfo = new TargetInfo(this.potentialMatchManager, command, targetElement)
+        let targetInfo = new TargetInfo(this.potentialMatchManager, command, targetElement, this.browserIndex)
         let parameter = null
 
         let fileNames = []

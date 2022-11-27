@@ -60,7 +60,7 @@ class AST {
         if (func == null) {
             return null
         }
-        let newFunc = new FunctionAST(func.path, func.name, func.description, [], [], null)
+        let newFunc = new FunctionAST(func.path, func.name, func.description, [], null, null)
         //clone the object to avoid multiple step refere to the same object
         if (func.mainFunc) {
             newFunc.mainFunc = func.mainFunc
@@ -112,7 +112,7 @@ class AST {
             //Import recordwright-func.js and get current function name and locator
             let mainFunc = bsFunction[funcName]
 
-            let locators = await bsFunction[funcName]({ getLocator: true })
+
 
 
 
@@ -125,7 +125,7 @@ class AST {
 
 
 
-            let functionAst = new FunctionAST(funcPath, funcName, methodDetail.methodDescription, methodDetail.jsDocTag, locators, mainFunc, methodDetail.returnJsDoc)
+            let functionAst = new FunctionAST(funcPath, funcName, methodDetail.methodDescription, methodDetail.jsDocTag, mainFunc, methodDetail.returnJsDoc)
             this.__addFuncAstToRepo(functionAst)
 
 
@@ -243,6 +243,8 @@ class AST {
 
         //extract keys from input dictionary
         for (let tag of commentAST.tags) {
+            //skip return tag
+            if (tag.title == 'returns') continue
             //skip input object
             if (tag.title == 'param' && !tag.name.includes('.')) continue
             tag.name = tag.name.split('.')[1]

@@ -1,7 +1,6 @@
 const ElementSelector = require('../class/ElementSelector')
 const HealingSnapshot = require('../class/HealingSnapshot')
-const { captureSnapshot, SnapshotData } = require('./snapshotCapture')
-const { Browser, Page, ElementHandle } = require('puppeteer-core')
+const { Frame, ElementHandle } = require('playwright')
 const assert = require('assert')
 class Options {
     constructor() {
@@ -13,134 +12,24 @@ class Options {
 
 
 }
-const VarSaver = require('../class/VarSaver')
-module.exports = waitForElement
+module.exports = findElement
 /**
  * Find a element within timeout period. If no element is found, a error will be thrown
-*  @param {Page} page 
+*  @param {Frame} frame 
  * @param {ElementSelector} elementSelector element selector object
  * @param {Options} option 
  * @param {number} timeout wait time in ms
  * @param {HealingSnapshot} healingSnapshot locator snapshot for auto-healing. File under .\snapshot\
  * @returns {ElementHandle}
  */
-async function waitForElement(page, elementSelector, timeout, option = new Options(), healingSnapshot) {
-    /**@type {Array<string>} */
-    let locatorOptions = elementSelector.locator
-    //find locator option within timeout
-    let startTime = Date.now()
-    /**@type {ElementHandle} */
-    let element = null
-    let elementInfo = null
-    let timeSpan = 0
-    let varSav = VarSaver.parseFromEnvVar()
-    let pageData = null
-    //extends the timeout by 1.5x if we are in the retry mode
-    if (varSav.retryCount > 0) timeout = timeout * 1.5
-    let blockedElement = null
-    do {
-
-        try {
-            for (let i = 0; i < locatorOptions.length; i++) {
-                let locator = locatorOptions[i]
-                element = await getElementByLocator(page, locator)
-
-                if (element != null) {
-                    break
-                }
-
-            }
-        } catch (error) {
-
-        }
-        let currentTime = Date.now()
-        timeSpan = currentTime - startTime
-        if (element != null) {
-            let clientHeight = await element.evaluate(node => node.getBoundingClientRect().height)
-            // let x = await element.evaluate(node => node.getBoundingClientRect().x)
-            // let y = await element.evaluate(node => node.getBoundingClientRect().y)
-            // let isBlocked = await isElementBlocked(element)
-            let isBlocked = false
-            if (clientHeight != null && clientHeight != 0 && !isBlocked) {
-                break
-            }
-        }
-        blockedElement = element
-        element = null
-    } while (timeSpan < timeout);
-
-    //locator found correctly and it is not part of healing trial, log coverage info
-    if (element != null && option.isHealingByLocatorBackup) {
-        try {
-            await varSav.healingInfo.createPerscription(elementSelector.displayName, elementSelector.locator, elementSelector.locator, null, varSav.currentFilePath, true)
-        } catch (error) {
-
-        }
-
+async function findElement(frame, elementSelector, healingSnapshot) {
+    let element = frame.locator(elementSelector.locator)
+    let resultLength = await element.count()
+    let result = null
+    if (resultLength == 0) {
+        result = element
     }
-
-    //conduct locator-based auto-healing
-    if (option.isHealingByLocatorBackup && element == null) {
-        elementInfo = await getElementBasedOnLocatorBackup(page, elementSelector, 0.8)
-        element = elementInfo.element
-        if (element != null) {
-            pageData = await highlightProposedElement(page, element)
-            await varSav.healingInfo.createPerscription(elementSelector.displayName, elementSelector.locator, elementInfo.locator, pageData, varSav.currentFilePath, false)
-        }
-    }
-    if (option.takeSnapshot) {
-        try {
-            if (pageData == null && varSav.isTakeSnapshot == true) {
-                try {
-                    pageData = await highlightProposedElement(page, element)
-                } catch (error) {
-                    let pngData = await page.screenshot({ type: 'png' })
-                    pageData = new SnapshotData(pngData, null)
-                }
-
-            }
-            await captureSnapshot(pageData)
-        } catch (error) {
-        }
-    }
-    //in case element is blocked and we cannot find any good alternative, use blocked element
-    //as a final workaround
-    if (element == null && blockedElement != null) {
-        element = blockedElement
-    }
-    if (element == null) {
-        let info = `Unable to find UI element: "${elementSelector.displayName}" in ${timeout}ms`
-        //only add result to locator report only when original locator is not found
-        //otherwise, it will log the locator that is used as part of auto-healing process into the log
-        //, we only want to see if original locator is working. We don't care failure during 
-        //locator healing
-        if (option.isHealingByLocatorBackup) {
-            await varSav.healingInfo.addWorkingLocatorRecord(elementSelector.displayName, false)
-        }
-
-        if (option.throwError) {
-            assert.fail(info)
-        }
-        else {
-            console.log(info)
-        }
-
-    }
-
-    // wait for a global timeout before we proceed
-    // some app, it will render ui at first, after ui is renderded, it will start to load context
-    // The challenge is that it takes 2-3s to load context after ui is rendered.
-    // if we extract value at that time, it will give us wrong value
-    // as a workaround, we will wait for a timeout before we interact with it
-    // so that the information could be loaded
-    if (process.env.BLUESTONE_EXECUTION_OPERATION_TIMEOUT_MS != null) {
-        try {
-            await page.waitForTimeout(process.env.BLUESTONE_EXECUTION_OPERATION_TIMEOUT_MS)
-        } catch (error) {
-            console.log(error)
-        }
-    }
-    return element
+    return result
 
 }
 class ElementInfo {

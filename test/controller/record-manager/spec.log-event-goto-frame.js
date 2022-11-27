@@ -47,7 +47,6 @@ describe('Resource Manager - stepControl - gotoFrame', () => {
         let iframeLocator = recordManager.stepControl._rawStepRepo[3].iframe
         for (let i = 4; i < 6; i++) {
             assert.deepEqual(iframeLocator, recordManager.stepControl._rawStepRepo[i].iframe)
-
         }
         let iframeVisible = await recordManager.browserControl.activePage.locator(iframeLocator).isVisible()
         assert.equal(iframeVisible, true)
