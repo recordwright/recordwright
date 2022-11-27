@@ -16,13 +16,16 @@ class RecordManager {
         this.io = io
         this.locatorControl = new LocatorControl(locatorPath)
         this.browserControl = new BrowserControl(config.recordwright.use, io)
-        this.stepControl = new StepControl()
-        this.funcDict = this._initFuncDict()
         this.runtimeSetting = new RuntimeSetting()
         this.functionControl = new FunctionControl(locatorPath)
 
+
+
         this.functionControl.store.loadFunctions(inbuiltFuncPath)
         this.functionControl.store.loadFunctions(userFuncPath)
+
+        this.stepControl = new StepControl(this.functionControl)
+        this.funcDict = this._initExposedFuncDict()
     }
     async waitForInit() {
         await this.browserControl.waitForInit()
@@ -173,7 +176,7 @@ class RecordManager {
         }
         return logCurrentElement
     }
-    _initFuncDict() {
+    _initExposedFuncDict() {
         return {
             setActiveLocator: this.locatorControl.exposeSetActiveLocator(),
             getActiveSelectors: this.locatorControl.exposeGetActiveSelectors(),

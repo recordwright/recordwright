@@ -1,6 +1,11 @@
 let RecordingStep = require('./class/recording-step')
+let FunctionControl = require('../function-control')
 class StepControl {
-    constructor() {
+    /**
+     * 
+     * @param {FunctionControl} funcControl 
+     */
+    constructor(funcControl) {
         /**
          * This is used to store final step information
          * @type {RecordingStep[]} 
@@ -9,6 +14,7 @@ class StepControl {
         /** @type {RecordingStep} */
         this._hoveredElement = null
         this.lastStepTimeStamp = Date.now()
+        this.funcControl = funcControl
         /**
          * This is used to store raw steps. Raw steps can be used to accelerate step update 
          * @type {RecordingStep[]} 
@@ -39,6 +45,6 @@ class StepControl {
         }
         return updateRecommendedLocators
     }
-    
+
 }
 module.exports = StepControl
