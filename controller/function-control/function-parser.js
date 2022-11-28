@@ -50,7 +50,7 @@ class AST {
     }
     /**
      * Based on the function name, return function ast
-     * @param {string} name 
+     * @param {'click'|'gotoFrame'|'waitforElement'|'bringPageToFront'} name 
      * @returns {FunctionAST}
      */
     getFunction(name) {

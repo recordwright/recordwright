@@ -27,12 +27,14 @@ describe('Resource Manager - logEvent- Switch Context', () => {
     })
 
     it('should record browser context index in event recorder correctly', async () => {
-        await recordManager.start({ headless: true })
+        await recordManager.start({ headless: false })
         await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.waitForInit()
-        await recordManager.browserControl.createBrowserContext({ headless: true })
+        await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
+        await recordManager.browserControl.createBrowserContext({ headless: false })
         await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.waitForInit()
+        await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
         let contexts = recordManager.browserControl.browser.contexts()
         for (let i = 0; i < contexts.length; i++) {
             let browserIndex = await contexts[i].pages()[0].evaluate(() => {
@@ -40,8 +42,11 @@ describe('Resource Manager - logEvent- Switch Context', () => {
                 let eventRecorder = window.eventRecorder
                 return eventRecorder.browserIndex
             })
-            assert.equal(browserIndex, i)
+            assert.equal(browserIndex, i, 'the browser index within the browser')
+            await contexts[i].pages()[0].locator(Locator.input.locator).click()
         }
-    }).timeout(10000)
+        await new Promise(resolve => setTimeout(resolve, 50))
+        assert.deepEqual()
+    }).timeout(1000000)
     it('should not record additional step if we stay in the same page').timeout(10000)
 })

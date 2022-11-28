@@ -15,7 +15,6 @@ class RecordManager {
 
         this.io = io
         this.locatorControl = new LocatorControl(locatorPath)
-        this.browserControl = new BrowserControl(config.recordwright.use, io)
         this.runtimeSetting = new RuntimeSetting()
         this.functionControl = new FunctionControl(locatorPath)
 
@@ -25,6 +24,9 @@ class RecordManager {
         this.functionControl.store.loadFunctions(userFuncPath)
 
         this.stepControl = new StepControl(this.functionControl)
+        let exposedFunc = this._initExposedFuncDict()
+        this.browserControl = new BrowserControl(config.recordwright.use, io, exposedFunc)
+
         this.funcDict = this._initExposedFuncDict()
     }
     async waitForInit() {

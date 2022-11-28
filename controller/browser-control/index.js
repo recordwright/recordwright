@@ -9,7 +9,7 @@ class BrowserControl {
      * @param {Object.<string,Function>} exposedFunc 
      * @param {object} io 
      */
-    constructor(browserConfig = config.recordwright.use, io) {
+    constructor(browserConfig = config.recordwright.use, io, exposedFunc = {}) {
         this.browser = null
         /**@type {import('playwright').Page} */
         this._activePage = null
@@ -22,7 +22,7 @@ class BrowserControl {
         this.activeContext = null
         this.contextList = []
         this.pictureWorkerList = []
-        this.exposedFunc = []
+        this.exposedFunc = exposedFunc
         this.io = io
         this.activeSnapshotWorker = null
     }
@@ -51,7 +51,7 @@ class BrowserControl {
     /**
      * Initialize browser instances
      */
-    async createBrowserContext({ headless = false, exposedFunc = [] } = {}) {
+    async createBrowserContext({ headless = false } = {}) {
         this.initCompleted = false
         //-----------------------main func------------------------
         let launchOption = { ...this.browserConfig, headless: headless }
@@ -106,18 +106,22 @@ class BrowserControl {
         await this._activePage.addInitScript(initFunc, JSON.stringify({ currentUrl, contextIndex }))
 
         //expose function from all over the places
-        await this._exposeFunctionToBrowser(exposedFunc, this._activePage)
+        await this._exposeFunctionToBrowser(this._activePage)
         //-----------------------main func complete---------------
         this.initCompleted = true
     }
     /**
      * Expose function to browser
-     * @param {Function[]} exposedFunc 
      * @param {import('playwright').Page} activePage 
      */
-    async _exposeFunctionToBrowser(exposedFunc, activePage) {
-        this.exposedFunc = exposedFunc
-        this.exposedFunc['takePictureSnapshot'] = this.activeSnapshotWorker.exposeTakeScreenshot()
+    async _exposeFunctionToBrowser(activePage) {
+        //take picture snapshot need to updated according to context
+        delete this.exposedFunc['takePictureSnapshot']
+
+        if (this.activeSnapshotWorker) {
+            this.exposedFunc['takePictureSnapshot'] = this.activeSnapshotWorker.exposeTakeScreenshot()
+        }
+
         for (let funcName of Object.keys(this.exposedFunc)) {
             await activePage.exposeFunction(funcName, this.exposedFunc[funcName])
         }
