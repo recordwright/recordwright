@@ -11,7 +11,7 @@ const FunctionControl = require('../../function-control')
 function handleBringPageToFront(stepList, step, functionControl) {
     let contextIndex = step.contextIndex
     //find prior context index before this step
-    let lastContextIndex = 0
+    let lastContextIndex = null
     stepList.forEach(item => {
         lastContextIndex = item.contextIndex
     })
@@ -23,6 +23,10 @@ function handleBringPageToFront(stepList, step, functionControl) {
     //if current context index is different. Add step to switch context
     let functionAst = functionControl.store.getFunction('bringPageToFront')
     let bringPageToFrontStep = RecordingStep.restore(step, functionAst, 'bringPageToFront')
+
+    //update parameters
+    bringPageToFrontStep.functionAst.params[2]['value'] = contextIndex
+
     stepList.push(bringPageToFrontStep)
     return stepList
 

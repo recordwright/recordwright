@@ -7,10 +7,11 @@ const fs = require('fs')
 const path = require('path')
 const config = require('../../../config')
 describe('Resource Manager - stepControl - gotoFrame', () => {
-    let recordwrightBackend = new RecordWrightBackend()
+    let recordwrightBackend = new RecordWrightBackend({})
     let locatorPath = path.join(__dirname, './files/locator.js')
 
     let recordManager = new RecordManager({ locatorPath: locatorPath })
+    recordManager.runtimeSetting.ignoredEventList = ['scroll']
     before(async function () {
         await recordwrightBackend.launchApp()
         this.timeout(60000)

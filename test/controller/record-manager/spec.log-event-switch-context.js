@@ -27,11 +27,11 @@ describe('Resource Manager - logEvent- Switch Context', () => {
     })
 
     it('should record browser context index in event recorder correctly', async () => {
-        await recordManager.start({ headless: false })
+        await recordManager.start({ headless: true })
         await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.waitForInit()
         await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
-        await recordManager.browserControl.createBrowserContext({ headless: false })
+        await recordManager.browserControl.createBrowserContext({ headless: true })
         await recordManager.browserControl._activePage.goto('https://todomvc.com/examples/vue/')
         await recordManager.waitForInit()
         await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
@@ -42,11 +42,16 @@ describe('Resource Manager - logEvent- Switch Context', () => {
                 let eventRecorder = window.eventRecorder
                 return eventRecorder.browserIndex
             })
-            assert.equal(browserIndex, i, 'the browser index within the browser')
+            assert.equal(browserIndex, i, 'the browser index should match designated value')
+            await contexts[i].pages()[0].locator(Locator.input.locator).click()
             await contexts[i].pages()[0].locator(Locator.input.locator).click()
         }
         await new Promise(resolve => setTimeout(resolve, 50))
-        assert.deepEqual()
+        assert.deepEqual(recordManager.stepControl.steps.length, 6, 'we expect to see 6 steps. 4 clicks+2 switch context. bringPageToFront should only be added once')
+        assert.deepEqual(recordManager.stepControl.steps[0].command, 'bringPageToFront', 'the bringPageToFront should be added at the beginning')
+        assert.deepEqual(recordManager.stepControl.steps[3].command, 'bringPageToFront', 'the bringPageToFront should be only added once')
+        assert.deepEqual(recordManager.stepControl.steps[0].parameter[2].value, '0', 'the paramter should be updated')
+        assert.deepEqual(recordManager.stepControl.steps[3].parameter[2].value, '1', 'the paramter should be updated')
+
     }).timeout(1000000)
-    it('should not record additional step if we stay in the same page').timeout(10000)
 })

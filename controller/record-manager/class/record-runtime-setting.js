@@ -1,15 +1,22 @@
 class EventBlackList {
-    constructor() {
-        this._blackList = ['scroll']
+    /**
+     * 
+     * @param {object} input
+     * @param {string[]} input.ignoredEventList
+     */
+    constructor({
+        ignoredEventList = ['scroll', 'mouseup', 'mousedown']
+    } = {}) {
+        this._ignoredEventList = ignoredEventList
         this._isRecording = true
         this._recordingStopTime = null
         this.recordingGracePeriod = 5000
     }
-    get blackList() {
-        return this._blackList
+    get ignoredEventList() {
+        return this._ignoredEventList
     }
-    set blackList(events) {
-        this._blackList = events
+    set ignoredEventList(events) {
+        this._ignoredEventList = events
     }
     get isRecording() {
         return this._isRecording

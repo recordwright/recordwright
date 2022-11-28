@@ -55,7 +55,8 @@ class TargetInfo {
             currentSelectedIndex: this.currentSelectedIndex,
             pos: this.position,
             timestamp: this.timeStamp,
-            healingTree: this.healingTree
+            healingTree: this.healingTree,
+            ...this
         }
     }
     init() {

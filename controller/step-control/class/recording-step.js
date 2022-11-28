@@ -6,7 +6,7 @@ const path = require('path')
 class RecordingStep {
     /** 
      * @param {object} recordingStep 
-     * @param {'click'|'change'|'dblclick'|'keydown'|'goto'|'upload'|'waitForDownloadComplete'|'waitAndHandleForAlert'|'scroll'|'gotoFrame'|'mousedown'|'dragstart'|'mouseup'|'waitElementExists'|'switchTab'|'mouseover'} recordingStep.command
+     * @param {'click'|'change'|'dblclick'|'keydown'|'goto'|'upload'|'waitForDownloadComplete'|'waitAndHandleForAlert'|'scroll'|'gotoFrame'|'mousedown'|'dragstart'|'mouseup'|'waitElementExists'|'bringPageToFront'|'mouseover'} recordingStep.command
     * @param {string} recordingStep.target
     * @param {Array<string>} recordingStep.matchedSelector
     * @param {number} recordingStep.timeoutMs
@@ -82,6 +82,7 @@ class RecordingStep {
         keys.forEach(key => {
             result[key] = json[key]
         })
+        result.parameter = functionAst.params
         result.command = command
         return result
     }

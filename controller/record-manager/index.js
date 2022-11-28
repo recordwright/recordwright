@@ -126,7 +126,7 @@ class RecordManager {
         return async function logEvent(eventDetail) {
 
             //skip steps that is in the mute list
-            if (context.runtimeSetting.blackList.includes(eventDetail.command)) {
+            if (context.runtimeSetting.ignoredEventList.includes(eventDetail.command)) {
                 return
             }
             //stop recording right away when we press ctrl+q

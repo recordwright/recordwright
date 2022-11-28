@@ -19,7 +19,7 @@ class BringContextToFrontResult {
  * @param {Object} input
  * @param {Browser} input.browser 
  * @param {ElementSelector} input.element
- * @param {Number} input.index x-coorindation offset in terms of percentage. Scale of 1
+ * @param {Number} input.index Index of browser. Start from 0
  * @returns {BringContextToFrontResult}
  */
 exports.bringPageToFront = async function (input) {
