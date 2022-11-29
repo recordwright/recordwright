@@ -2,6 +2,7 @@
 const { test, Page, Frame } = require('@playwright/test')
 const ElementSelector = require('../class/ElementSelector')
 const RecordwrightFunc = require('../class/RecordwrightFunc')
+const findElement = require('./findElement')
 /**
  * Click UI Element at against coordaination
  * @param {Object} input
@@ -24,7 +25,8 @@ exports.click = async function (input) {
                 /**
                  * click on element based on the size
                  */
-                let locator = await input.frame.locator(input.element.locator)
+                let locator = await findElement(input.frame, input.element)
+                await locator.hover({ force: true })
                 let rect = await locator.boundingBox()
                 let x = rect.width * input.x
                 let y = rect.height * input.y
