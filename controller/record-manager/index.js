@@ -62,7 +62,11 @@ class RecordManager {
         else if (eventDetail.potentialMatch.length == 1) {
             //specify final locator based on potential match
             let index = eventDetail.potentialMatch[0]
-            let locator = this.locatorControl.locatorLibrary[index]
+            //in case we are feeding processed step again..
+            let locator = index
+            if ((typeof index) == 'number') {
+                locator = this.locatorControl.locatorLibrary[index]
+            }
             finalLocator = locator.Locator
             finalLocatorName = locator.path
         }

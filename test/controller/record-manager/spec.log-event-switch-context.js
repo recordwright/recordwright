@@ -16,6 +16,10 @@ describe('Resource Manager - logEvent- Switch Context', () => {
         this.timeout(60000)
 
     })
+    beforeEach(async function () {
+        recordManager.stepControl.steps = []
+        recordManager.stepControl._rawStepRepo = []
+    })
     afterEach(async function () {
         await recordManager.browserControl.closeAllInstances()
         this.timeout(60000)
@@ -47,11 +51,11 @@ describe('Resource Manager - logEvent- Switch Context', () => {
             await contexts[i].pages()[0].locator(Locator.input.locator).click()
         }
         await new Promise(resolve => setTimeout(resolve, 50))
-        assert.deepEqual(recordManager.stepControl.steps.length, 6, 'we expect to see 6 steps. 4 clicks+2 switch context. bringPageToFront should only be added once')
+        assert.deepEqual(recordManager.stepControl.steps.length, 10, 'we expect to see 6 steps. 4 clicks+2 switch context +4 waitForElement. bringPageToFront should only be added once')
         assert.deepEqual(recordManager.stepControl.steps[0].command, 'bringPageToFront', 'the bringPageToFront should be added at the beginning')
-        assert.deepEqual(recordManager.stepControl.steps[3].command, 'bringPageToFront', 'the bringPageToFront should be only added once')
+        assert.deepEqual(recordManager.stepControl.steps[5].command, 'bringPageToFront', 'the bringPageToFront should be only added once')
         assert.deepEqual(recordManager.stepControl.steps[0].parameter[2].value, '0', 'the paramter should be updated')
-        assert.deepEqual(recordManager.stepControl.steps[3].parameter[2].value, '1', 'the paramter should be updated')
+        assert.deepEqual(recordManager.stepControl.steps[5].parameter[2].value, '1', 'the paramter should be updated')
 
     }).timeout(1000000)
 })

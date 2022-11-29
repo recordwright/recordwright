@@ -17,6 +17,10 @@ describe('Resource Manager - stepControl - gotoFrame', () => {
         this.timeout(60000)
 
     })
+    beforeEach(async function () {
+        recordManager.stepControl.steps = []
+        recordManager.stepControl._rawStepRepo = []
+    })
     afterEach(async function () {
         await recordManager.browserControl.closeAllInstances()
         this.timeout(60000)
