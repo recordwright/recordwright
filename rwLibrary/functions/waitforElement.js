@@ -5,7 +5,7 @@ const RecordwrightFunc = require('../class/RecordwrightFunc')
 const HealingSnapshot = require('../class/HealingSnapshot')
 const findElement = require('./findElement')
 /**
- * Click UI Element at against coordaination
+ * Wait for element to exists
  * @param {Object} input
  * @param {Frame} input.frame 
  * @param {ElementSelector} input.element
