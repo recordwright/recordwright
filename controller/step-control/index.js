@@ -2,6 +2,7 @@ let RecordingStep = require('./class/recording-step')
 let FunctionControl = require('../function-control')
 const handleBringPageToFront = require('./step-hande-support/handleBringPageToFront')
 const handleWaitForElement = require('./step-hande-support/handleWaitForElement')
+const handleGotoFrame = require('./step-hande-support/handleGotoFrame')
 class StepControl {
     /**
      * 
@@ -24,11 +25,17 @@ class StepControl {
         this._rawStepRepo = []
     }
     addStep(step) {
-        this.lastStepTimeStamp = Date.now()
-        this._rawStepRepo.push(step)
-        this.steps = handleBringPageToFront(this.steps, step, this.funcControl)
-        this.steps = handleWaitForElement(this.steps, step, this.funcControl)
-        this.steps.push(step)
+        try {
+            this.lastStepTimeStamp = Date.now()
+            this._rawStepRepo.push(step)
+            this.steps = handleBringPageToFront(this.steps, step, this.funcControl)
+            this.step = handleGotoFrame(this.steps, step, this.funcControl, handleWaitForElement)
+            this.steps = handleWaitForElement(this.steps, step, this.funcControl)
+            this.steps.push(step)
+        } catch (error) {
+            console.log(error)
+        }
+
     }
     get hoveredElement() {
         return this._hoveredElement

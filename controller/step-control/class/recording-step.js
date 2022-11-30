@@ -76,12 +76,12 @@ class RecordingStep {
      * @returns {RecordingStep}
      */
     static restore(json, functionAst, command) {
-        json.functionAst = functionAst
         let result = new RecordingStep(json)
         let keys = Object.keys(json)
         keys.forEach(key => {
             result[key] = json[key]
         })
+        result.functionAst = functionAst
         result.parameter = functionAst.params
         result.command = command
         return result

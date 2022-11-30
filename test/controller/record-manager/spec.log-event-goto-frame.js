@@ -56,6 +56,23 @@ describe('Resource Manager - stepControl - gotoFrame', () => {
         }
         let iframeVisible = await recordManager.browserControl.activePage.locator(iframeLocator).isVisible()
         assert.equal(iframeVisible, true)
+
+        //there should be 1 goto frame operation 
+        let gotoIFrameStepList = recordManager.stepControl.steps.filter(item => item.command == 'gotoFrame')
+        assert.deepEqual(gotoIFrameStepList.length, 1)
+        let iFrameIndex = recordManager.stepControl.steps.findIndex(item => item == gotoIFrameStepList[0])
+
+        //before gotoFrame step, there should be a step waiting for element
+        let waitForElementStep = recordManager.stepControl.steps[iFrameIndex - 1]
+        assert.deepEqual(waitForElementStep.target, gotoIFrameStepList[0].target, 'There should be a wait step for frame')
+
+        //the prior step before gotoFrame's iframe should be different from gotoframe
+        let clickStep = recordManager.stepControl.steps[iFrameIndex - 2]
+        assert.notDeepEqual(clickStep.iframe, gotoIFrameStepList[0].target, 'The frame for prior step is not the same as new frame we want to switch to')
+
+        //the step after gotoFrame's iframe should be equal to the frame gotoFrame switch to
+        let nextWaitForElementStep = recordManager.stepControl.steps[iFrameIndex + 1]
+        assert.deepEqual(nextWaitForElementStep.iframe, gotoIFrameStepList[0].target, 'the step after gotoFrame iframe should be equal to the frame gotoFrame switch to')
     }).timeout(10000)
     it('should switch in between multipe iframe')
     it('should switch back to main page')

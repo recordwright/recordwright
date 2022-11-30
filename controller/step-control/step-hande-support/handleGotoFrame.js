@@ -7,32 +7,40 @@ const FunctionControl = require('../../function-control')
  * @param {RecordingStep[]} stepList
  * @param {RecordingStep} step
  * @param {FunctionControl} functionControl
+ * @param {Function} handleWaitForElement
  */
-function handleBringPageToFront(stepList, step, functionControl) {
+function handleGotoFrame(stepList, step, functionControl, handleWaitForElement) {
 
     let waitCommand = 'waitforElement'
+    let gotoFrame = 'gotoFrame'
+    let lastFrame = ''
 
-    let isAddWaitResultRequired = getAddWaitRequired(step)
-    if (!isAddWaitResultRequired)
+    stepList.forEach(item => {
+        lastFrame = item.iframe
+    })
+
+    //if last frame is the same as current frame, we will not add additional goto frame step
+    if (step.iframe == lastFrame) {
         return stepList
-    //will not add wait step for those function who does not need to interact with specific element
+    }
 
 
-    //if current context index is different. Add step to switch context
-    let functionAst = functionControl.store.getFunction(waitCommand)
-    let newStep = RecordingStep.restore(step, functionAst, waitCommand)
+    //curent iframe is different from prior step, add wait for current iframe
+
+    let functionAst = functionControl.store.getFunction(gotoFrame)
+    let newStep = RecordingStep.restore(step, functionAst, gotoFrame)
 
     //update elementSelector to match current step
-    let newElementSelectorIndex = newStep.functionAst.params.findIndex(item => item.type.name == 'ElementSelector')
-    let stepElementSelectorIndex = step.functionAst.params.findIndex(item => item.type.name == 'ElementSelector')
-    newStep.functionAst.params[newElementSelectorIndex].value = step.functionAst.params[stepElementSelectorIndex].value
+    newStep.potentialMatch = newStep.framePotentialMatch
+    newStep.target = newStep.iframe
+    if (newStep.potentialMatch.length == 0) {
+        newStep.finalLocator = newStep.potentialMatch[0].Locator
+        newStep.finalLocatorName = newStep.potentialMatch[0].path
+    }
+    //add waitForElement for current frame because frame loading could be time consuming too.
+    stepList = handleWaitForElement(stepList, newStep, functionControl)
 
-    //update timeout
-    let newTimeoutIndex = newStep.functionAst.params.findIndex(item => item.name == 'timeout')
-    let newWaitTime = step.timeoutMs
-    if (newWaitTime < 3000) newWaitTime = 3000
-    newStep.functionAst.params[newTimeoutIndex].value = newWaitTime
-
+    //after add wait for element, push gotoFrame step into list
     stepList.push(newStep)
     return stepList
 
@@ -42,7 +50,6 @@ function handleBringPageToFront(stepList, step, functionControl) {
 
  */
 function getAddWaitRequired(step) {
-    
     let elementSelectorParam = step.functionAst.params.find(item => item.type.name == 'ElementSelector')
     let result = true
     ////will not add wait step for those function who does not need to interact with html element
@@ -66,4 +73,4 @@ function getAddWaitRequired(step) {
 
 
 }
-module.exports = handleBringPageToFront
+module.exports = handleGotoFrame

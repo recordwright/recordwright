@@ -50,6 +50,12 @@ class RecordManager {
         let potentialMatch = eventDetail.potentialMatch.map(index => this.locatorControl.locatorLibrary[index])
         potentialMatch = JSON.parse(JSON.stringify(potentialMatch))
 
+        //specify iframe
+        let iframe = null
+        if(framePotentialMatch.length==0){
+            iframe = framePotentialMatch[0]
+        }
+
         //specify final locator
         let finalLocator = ''
         let finalLocatorName = ''
