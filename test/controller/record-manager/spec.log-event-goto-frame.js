@@ -42,7 +42,7 @@ describe('Resource Manager - stepControl - gotoFrame', () => {
         await recordManager.browserControl.activePage.click(Locator.input.locator)
         await new Promise(resolve => setTimeout(resolve, 50))
         await recordManager.browserControl.activePage.frame('test1').click(Locator.input.locator)
-        await new Promise(resolve => setTimeout(resolve, 50))
+        await new Promise(resolve => setTimeout(resolve, 150))
         assert.deepEqual(recordManager.stepControl._rawStepRepo.length, 6)
         //for step 1 to 3, the iframe should be empty because they are in main frame
         for (let i = 0; i < 3; i++) {
