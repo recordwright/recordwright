@@ -10,8 +10,6 @@ const FunctionControl = require('../../function-control')
  * @param {Function} handleWaitForElement
  */
 function handleGotoFrame(stepList, step, functionControl, handleWaitForElement) {
-
-    let waitCommand = 'waitforElement'
     let gotoFrame = 'gotoFrame'
     let lastFrame = ''
 

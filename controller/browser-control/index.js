@@ -131,11 +131,21 @@ class BrowserControl {
      */
     async __waitForPotentialMatchManagerPopoulated() {
         while (true) {
-            let potentialMatchCount = await this._activePage.evaluate(item => {
-                return window.eventRecorder.potentialMatchManager.currentPotentialMatchList.length
-            })
-            if (potentialMatchCount > 0)
+            let frameList = this._activePage.frames()
+            let allPotentialMatchPopulated = true
+            for (let frame of frameList) {
+                let potentialMatchCount = await frame.evaluate(item => {
+                    return window.eventRecorder.potentialMatchManager.currentPotentialMatchList.length
+                })
+                if (potentialMatchCount == 0) {
+                    allPotentialMatchPopulated = false
+                    break
+                }
+
+            }
+            if (allPotentialMatchPopulated)
                 break
+
             await new Promise(resolve => setTimeout(resolve, 200))
         }
     }

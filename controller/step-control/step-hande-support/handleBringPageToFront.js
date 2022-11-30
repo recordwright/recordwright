@@ -27,6 +27,9 @@ function handleBringPageToFront(stepList, step, functionControl) {
     //update parameters
     bringPageToFrontStep.functionAst.params[2]['value'] = contextIndex
 
+    //remove iframe as default iframe for bringPageToFront is empty
+    bringPageToFrontStep.iframe = ''
+
     stepList.push(bringPageToFrontStep)
     return stepList
 

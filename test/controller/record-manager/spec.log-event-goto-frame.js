@@ -31,6 +31,7 @@ describe('Resource Manager - stepControl - gotoFrame', () => {
         this.timeout(60000)
     })
     it('should switch from main page to frame correctly', async () => {
+        recordManager.runtimeSetting.ignoredEventList = ['scroll']
         await recordManager.start({ headless: true })
         await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
         let iFrameId = 'test1'
@@ -74,6 +75,89 @@ describe('Resource Manager - stepControl - gotoFrame', () => {
         let nextWaitForElementStep = recordManager.stepControl.steps[iFrameIndex + 1]
         assert.deepEqual(nextWaitForElementStep.iframe, gotoIFrameStepList[0].target, 'the step after gotoFrame iframe should be equal to the frame gotoFrame switch to')
     }).timeout(10000)
-    it('should switch in between multipe iframe')
-    it('should switch back to main page')
+    it('should switch in between multipe iframe', async () => {
+        recordManager.runtimeSetting.ignoredEventList = ['scroll', 'mousedown', 'mouseup']
+        await recordManager.start({ headless: true })
+        await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
+        let iFrameId1 = 'test1'
+        await injectIframe({
+            page: recordManager.browserControl.activePage,
+            iframeId: iFrameId1
+        })
+
+        let iFrameId2 = 'test2'
+        await injectIframe({
+            page: recordManager.browserControl.activePage,
+            iframeId: iFrameId2
+        })
+        await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
+        await recordManager.browserControl.activePage.frameLocator(`#${iFrameId1}`).locator(Locator.input.locator).click()
+        await new Promise(resolve => setTimeout(resolve, 50))
+        await recordManager.browserControl.activePage.frameLocator(`#${iFrameId2}`).locator(Locator.input.locator).click()
+        await new Promise(resolve => setTimeout(resolve, 150))
+
+        //there should be 1 goto frame operation 
+        let gotoIFrameStepList = recordManager.stepControl.steps.filter(item => item.command == 'gotoFrame')
+        assert.deepEqual(gotoIFrameStepList.length, 2, 'there should be 2 goto frame operation ')
+        for (let gotoIFrameStep of gotoIFrameStepList) {
+            let iFrameIndex = recordManager.stepControl.steps.findIndex(item => item == gotoIFrameStep)
+
+            //before gotoFrame step, there should be a step waiting for element
+            let waitForElementStep = recordManager.stepControl.steps[iFrameIndex - 1]
+            assert.deepEqual(waitForElementStep.target, gotoIFrameStep.target, 'There should be a wait step for frame')
+
+            //the prior step before gotoFrame's iframe should be different from gotoframe
+            let clickStep = recordManager.stepControl.steps[iFrameIndex - 2]
+            assert.notDeepEqual(clickStep.iframe, gotoIFrameStep.target, 'The frame for prior step is not the same as new frame we want to switch to')
+
+            //the step after gotoFrame's iframe should be equal to the frame gotoFrame switch to
+            let nextWaitForElementStep = recordManager.stepControl.steps[iFrameIndex + 1]
+            assert.deepEqual(nextWaitForElementStep.iframe, gotoIFrameStep.target, 'the step after gotoFrame iframe should be equal to the frame gotoFrame switch to')
+        }
+        assert.ok(gotoIFrameStepList[0].target.includes(iFrameId1), 'the first iframe should be test1')
+        assert.ok(gotoIFrameStepList[1].target.includes(iFrameId2), 'the 2nd iframe should be test2')
+
+    }).timeout(10000)
+    it('should switch back to main page', async () => {
+        recordManager.runtimeSetting.ignoredEventList = ['scroll', 'mousedown', 'mouseup']
+        await recordManager.start({ headless: true })
+        await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
+        let iFrameId1 = 'test1'
+        await injectIframe({
+            page: recordManager.browserControl.activePage,
+            iframeId: iFrameId1
+        })
+
+        let iFrameId2 = 'test2'
+        await injectIframe({
+            page: recordManager.browserControl.activePage,
+            iframeId: iFrameId2
+        })
+        await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
+        await recordManager.browserControl.activePage.frameLocator(`#${iFrameId1}`).locator(Locator.input.locator).click()
+        await new Promise(resolve => setTimeout(resolve, 50))
+        await recordManager.browserControl.activePage.locator(Locator.input.locator).click()
+        await new Promise(resolve => setTimeout(resolve, 150))
+
+        //there should be 1 goto frame operation 
+        let gotoIFrameStepList = recordManager.stepControl.steps.filter(item => item.command == 'gotoFrame')
+        assert.deepEqual(gotoIFrameStepList.length, 2, 'there should be 2 goto frame operation ')
+        for (let gotoIFrameStep of gotoIFrameStepList) {
+            let iFrameIndex = recordManager.stepControl.steps.findIndex(item => item == gotoIFrameStep)
+
+            //before gotoFrame step, there should be a step waiting for element
+            let waitForElementStep = recordManager.stepControl.steps[iFrameIndex - 1]
+            assert.deepEqual(waitForElementStep.target, gotoIFrameStep.target, 'There should be a wait step for frame')
+
+            //the prior step before gotoFrame's iframe should be different from gotoframe
+            let clickStep = recordManager.stepControl.steps[iFrameIndex - 2]
+            assert.notDeepEqual(clickStep.iframe, gotoIFrameStep.target, 'The frame for prior step is not the same as new frame we want to switch to')
+
+            //the step after gotoFrame's iframe should be equal to the frame gotoFrame switch to
+            let nextWaitForElementStep = recordManager.stepControl.steps[iFrameIndex + 1]
+            assert.deepEqual(nextWaitForElementStep.iframe, gotoIFrameStep.target, 'the step after gotoFrame iframe should be equal to the frame gotoFrame switch to')
+        }
+        assert.ok(gotoIFrameStepList[0].target.includes(iFrameId1), 'the first iframe should be test1')
+        assert.ok(gotoIFrameStepList[1].target == '', 'the 2nd iframe should be empty')
+    }).timeout(100000)
 })
