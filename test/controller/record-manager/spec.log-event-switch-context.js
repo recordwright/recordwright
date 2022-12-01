@@ -6,7 +6,7 @@ const Locator = require('./files/locator')
 const fs = require('fs')
 const path = require('path')
 const config = require('../../../config')
-describe('Resource Manager - logEvent- Switch Context', () => {
+describe('Record Manager - logEvent- Switch Context', () => {
     let recordwrightBackend = new RecordWrightBackend()
     let locatorPath = path.join(__dirname, './files/locator.js')
 
