@@ -23,17 +23,21 @@ exports.waitforElement = async function (input) {
             /**
              * click on element based on the size
              */
-
-            let startTime = Date.now()
-            let elapsedTime = 0
-            while (elapsedTime < input.timeout) {
-                let element = await findElement(input.frame, input.element, input.healingSnapshot)
-                if (element != null)
-                    return element
-                elapsedTime = Date.now() - startTime
+            try {
+                let startTime = Date.now()
+                let elapsedTime = 0
+                while (elapsedTime < input.timeout) {
+                    let element = await findElement(input.frame, input.element, input.healingSnapshot)
+                    if (element != null)
+                        return element
+                    elapsedTime = Date.now() - startTime
+                }
+            } catch (error) {
+                return Promise.reject(`Unable to Click Find :${input.element.displayName}    Error: ${error}`)
             }
 
-            return Promise.reject(`Unable to Click Element:${input.element.displayName}    Error: ${error}`)
+
+
 
         }
 

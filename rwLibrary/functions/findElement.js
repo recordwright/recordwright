@@ -26,7 +26,7 @@ async function findElement(frame, elementSelector, healingSnapshot) {
     let element = frame.locator(elementSelector.locator)
     let resultLength = await element.count()
     let result = null
-    if (resultLength == 0) {
+    if (resultLength == 1) {
         result = element
     }
     return result

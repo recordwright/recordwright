@@ -28,6 +28,8 @@ exports.click = async function (input) {
                 let locator = await findElement(input.frame, input.element)
                 await locator.hover({ force: true })
                 let rect = await locator.boundingBox()
+                if (input.x == null) input.x = 0.5
+                if (input.y == null) input.y = 0.5
                 let x = rect.width * input.x
                 let y = rect.height * input.y
                 await locator.click({ position: { x: x, y: y }, force: true })
