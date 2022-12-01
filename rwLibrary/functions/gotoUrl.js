@@ -28,7 +28,7 @@ exports.gotoUrl = async function (input) {
             for (iRetryCount = 0; iRetryCount < 5; iRetryCount++) {
                 try {
 
-                    await page.goto(link)
+                    await input.page.goto(link)
                     break
                 } catch (error) {
                     console.log('Unable to go to ' + link)

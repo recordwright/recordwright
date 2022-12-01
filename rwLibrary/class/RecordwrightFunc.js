@@ -13,9 +13,19 @@ class BasePlayWrightFunction {
     }
     async run() {
         let logInfo = await this.getLog()
-        await test.step(logInfo, async () => {
-            await this.func(this.input)
-        })
+        let result = true
+        try {
+            await test.step(logInfo, async () => {
+                result = await this.func(this.input)
+            })
+        } catch (error) {
+            //implement this for testing purpose. The unit test framework we used is mocha unfortuantely....
+            if (error.message.includes('test.step() can only')) {
+                result = await this.func(this.input)
+            }
+        }
+        return result
+
     }
     /**
      * This is step information for current operation
