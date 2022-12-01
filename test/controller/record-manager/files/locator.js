@@ -29,4 +29,8 @@ module.exports = {
         displayName: 'paragrah-duplicate-2',
         snapshot: './locator/test.json'
     },
+    'test frame 2': {
+        locator: '#test-frame-2',
+        displayName: 'main frame',
+    }
 };

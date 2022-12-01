@@ -66,9 +66,24 @@ class TargetInfo {
         let target = targetElementLocatorResult.target
         this.selector = targetElementLocatorResult.selector
 
-        let targetIFrameLocatorResult = this._getLocatorByTargetElement(window.frameElement)
+
+        //if we are on the top of the frame, we will redirect that to html otherwise null locator will not cause any locator match
+        let targetFrameElement = window.frameElement
+        if (targetFrameElement == null) {
+            //current element is in the main frame
+            targetFrameElement = document.children[0]
+            this.framePotentialMatch = this.potentialMatchManager.getPotentialMatchByTarget(targetFrameElement)
+        }
+        else {
+            //current element is within a children frame, then frame match need to be got from parent frame
+            this.framePotentialMatch = window.frameElement.contentWindow.parent.eventRecorder.potentialMatchManager.getPotentialMatchByTarget(window.frameElement)
+        }
+
+        let targetIFrameLocatorResult = this._getLocatorByTargetElement(targetFrameElement)
         this.iframe = targetIFrameLocatorResult.selector
-        this.framePotentialMatch = this.potentialMatchManager.getPotentialMatchByTarget(window.frameElement)
+
+
+
         this.potentialMatch = this.potentialMatchManager.getPotentialMatchByTarget(target)
 
         this.currentSelectedIndex = this.potentialMatchManager.getElementSelectorIndex(target)
@@ -291,11 +306,9 @@ export class BrowserEventRecorder {
         if ((targetInfo.position.height > 0 && targetInfo.position.width > 0) || command == 'upload' || command == null) {
             window.logEvent(eventDetail)
         }
-        console.log(targetInfo)
         if (command == null) {
             this.locatorRecommendationManager.getLocatorBackup(event.target)
         }
-        // console.log(JSON.stringify(event))
     }
     /**
      * 

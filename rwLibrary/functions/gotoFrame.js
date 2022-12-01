@@ -21,12 +21,7 @@ exports.gotoFrame = async function (input) {
         async func() {
             try {
                 let element = null
-                if (input.element.locator == '') {
-                    element = input.frame.page()
-                }
-                else {
-                    element = await findElement(input.frame, input.element)
-                }
+                element = await findElement(input.frame, input.element)
 
                 let frame = await element.contentFrame()
                 return frame

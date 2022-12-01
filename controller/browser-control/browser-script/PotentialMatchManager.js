@@ -305,15 +305,19 @@ export class PotentialMatchManager {
     }
     getElementsByLocator(currentLocator) {
         let currentElementList = []
+        try {
+            if (currentLocator.startsWith('/') || currentLocator.startsWith('(')) {
+                //current locator is xpath
+                currentElementList = getElementByXpath(currentLocator)
+            }
+            else {
+                //current selector is css selector
+                currentElementList = document.querySelectorAll(currentLocator)
+            }
+        } catch (error) {
+            console.log('Invalid Locator: ' + currentLocator)
+        }
 
-        if (currentLocator.startsWith('/') || currentLocator.startsWith('(')) {
-            //current locator is xpath
-            currentElementList = getElementByXpath(currentLocator)
-        }
-        else {
-            //current selector is css selector
-            currentElementList = document.querySelectorAll(currentLocator)
-        }
         return currentElementList
 
     }

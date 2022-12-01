@@ -51,11 +51,13 @@ describe('Resource Manager - logEvent- Switch Context', () => {
             await contexts[i].pages()[0].locator(Locator.input.locator).click()
         }
         await new Promise(resolve => setTimeout(resolve, 50))
-        assert.deepEqual(recordManager.stepControl.steps.length, 10, 'we expect to see 6 steps. 4 clicks+2 switch context +4 waitForElement. bringPageToFront should only be added once')
-        assert.deepEqual(recordManager.stepControl.steps[0].command, 'bringPageToFront', 'the bringPageToFront should be added at the beginning')
-        assert.deepEqual(recordManager.stepControl.steps[5].command, 'bringPageToFront', 'the bringPageToFront should be only added once')
-        assert.deepEqual(recordManager.stepControl.steps[0].parameter[2].value, '0', 'the paramter should be updated')
-        assert.deepEqual(recordManager.stepControl.steps[5].parameter[2].value, '1', 'the paramter should be updated')
+        assert.deepEqual(recordManager.stepControl.steps.length, 14, 'we expect to see 6 steps. 4 clicks+2 switch context +4 waitForElement+2 goto frame + 2 wait for frame. bringPageToFront should only be added once')
+        let bringPageToFrontSteps = recordManager.stepControl.steps.filter(item => item.command == 'bringPageToFront')
+        assert.deepEqual(bringPageToFrontSteps.length, 2, '2 bring page to front context exists because we launch 2 browsers')
+        for (let i = 0; i < bringPageToFrontSteps.length; i++) {
+            let step = bringPageToFrontSteps[i]
+            assert.deepEqual(step.parameter[2].value, i, 'the context index should be set accordingly')
+        }
 
     }).timeout(1000000)
 })

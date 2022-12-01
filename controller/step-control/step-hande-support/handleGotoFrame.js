@@ -22,6 +22,10 @@ function handleGotoFrame(stepList, step, functionControl, handleWaitForElement) 
         return stepList
     }
 
+    //if current step does not have element selector, there is no need to switch frame
+    let elementSelectorParam = step.functionAst.params.find(item => item.type.name == 'ElementSelector')
+    if (elementSelectorParam == null)
+        return stepList
 
     //curent iframe is different from prior step, add wait for current iframe
 
@@ -31,9 +35,11 @@ function handleGotoFrame(stepList, step, functionControl, handleWaitForElement) 
     //update elementSelector to match current step
     newStep.potentialMatch = newStep.framePotentialMatch
     newStep.target = newStep.iframe
-    if (newStep.potentialMatch.length == 0) {
-        newStep.finalLocator = newStep.potentialMatch[0].Locator
-        newStep.finalLocatorName = newStep.potentialMatch[0].path
+    newStep.finalLocator = ''
+    newStep.finalLocatorName = ''
+    if (newStep.framePotentialMatch.length == 1) {
+        newStep.finalLocator = newStep.framePotentialMatch[0].Locator
+        newStep.finalLocatorName = newStep.framePotentialMatch[0].path
     }
     //add waitForElement for current frame because frame loading could be time consuming too.
     stepList = handleWaitForElement(stepList, newStep, functionControl)

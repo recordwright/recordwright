@@ -39,7 +39,7 @@ describe('Resource Manager - logEvent- waitForElement', () => {
         await recordManager.browserControl.activePage.locator(Locator.input.locator).click()
         await recordManager.browserControl.activePage.locator(Locator.input.locator).click()
         await new Promise(resolve => setTimeout(resolve, 50))
-        assert.deepEqual(recordManager.stepControl.steps.length, 5, 'we expect to see 5 steps. 1 go to context, 1 wait for element, 1 click, 1 wait, 1 click')
+        assert.deepEqual(recordManager.stepControl.steps.length, 7, 'we expect to see 7 steps. 1 go to context, 1 wait for element, 1 click, 1 wait, 1 click, 1 wait frame, 1 goto frame')
         assert.deepEqual(recordManager.stepControl.steps[1].command, 'waitforElement', 'the waitforElement should be added')
         assert.deepEqual(recordManager.stepControl.steps[1].parameter[2].value > 0, true, 'the timeout should be populated')
         assert.deepEqual(recordManager.stepControl.steps[3].command, 'waitforElement', 'the waitforElement should be added')
@@ -57,7 +57,7 @@ describe('Resource Manager - logEvent- waitForElement', () => {
         let newStep = RecordingStep.restore(step, functionASt, 'gotoUrl')
         recordManager.exposeLogEvent()(newStep)
         await new Promise(resolve => setTimeout(resolve, 50))
-        assert.deepEqual(recordManager.stepControl.steps.length, 4, 'we expect to see 4 steps. 1 go to context, 1 wait for element, 1 click, 1 gotoUrl')
+        assert.deepEqual(recordManager.stepControl.steps.length, 6, 'we expect to see 4 steps. 1 go to context, 1 wait for element, 1 click, 1 gotoUrl, 1 go to frame, 1 wait for frame')
     }).timeout(10000)
 
 })

@@ -44,7 +44,7 @@ class RecordManager {
     convertEventDetailToRecordingStep(eventDetail, backupTargetLocator = '', lastOperationTime = Date.now()) {
         let snapshotIndex = this.browserControl.activeSnapshotWorker.records.length - 1
         let snapshotPath = this.browserControl.activeSnapshotWorker.records[snapshotIndex].path
-        let framePotentialMatch = eventDetail.potentialMatch.map(index => this.locatorControl.locatorLibrary[index])
+        let framePotentialMatch = eventDetail.framePotentialMatch.map(index => this.locatorControl.locatorLibrary[index])
         framePotentialMatch = JSON.parse(JSON.stringify(framePotentialMatch))
 
         let potentialMatch = eventDetail.potentialMatch.map(index => this.locatorControl.locatorLibrary[index])
@@ -52,7 +52,7 @@ class RecordManager {
 
         //specify iframe
         let iframe = null
-        if(framePotentialMatch.length==0){
+        if (framePotentialMatch.length == 0) {
             iframe = framePotentialMatch[0]
         }
 
