@@ -14,6 +14,7 @@ describe('Recordwright Library - createNewContext', () => {
         ({ frame, page } = await rwFunc.createNewContext({ browser }));
         assert.equal(browser.contexts().length, 2, 'there should be exact 1 context upon initialization')
         assert.equal(browser.contexts()[1].pages().length, 1, 'there should be exact 1 page');
+        assert.deepEqual(browser.contexts()[1].pages()[0], page, 'it should returns right page');
 
 
     }).timeout(5000)
