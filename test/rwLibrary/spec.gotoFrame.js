@@ -8,7 +8,7 @@ const { injectIframe } = require('../controller/record-manager/support')
 describe('Recordwright Library - gotoFrame', () => {
     it('should switch back and forth in between frames and main frames', async () => {
 
-        let browser = await chromium.launch({ ...config.launchOption, headless: false })
+        let browser = await chromium.launch({ ...config.launchOption, headless: true })
         await browser.newPage()
         let { context, frame, page } = await rwFunc.initialize({ browser: browser })
         let todoMvcLink = 'https://todomvc.com/examples/vue/'
