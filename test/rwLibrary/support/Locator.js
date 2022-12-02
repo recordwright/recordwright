@@ -12,7 +12,7 @@ module.exports = {
         snapshot: './locator/close button.json'
     },
     'test': {
-        locator: '/html',
+        locator: '//input[@placeholder]',
         screenshot: 'componentPic/test.png',
         displayName: 'test',
         snapshot: './locator/test.json'
@@ -32,6 +32,10 @@ module.exports = {
     'test frame 2': {
         locator: '#test-frame-2',
         displayName: 'main frame',
+    },
+    'test frame 1': {
+        locator: '#test-frame-1',
+        displayName: 'test frame 1',
     },
     'Evan You': {
         locator: "//a[.='Evan You']",

@@ -23,11 +23,11 @@ module.exports = findElement
  * @returns {ElementHandle}
  */
 async function findElement(frame, elementSelector, healingSnapshot) {
-    let element = frame.locator(elementSelector.locator)
-    let resultLength = await element.count()
+    let elementList = await frame.locator(elementSelector.locator).elementHandles()
+    let resultLength = await elementList.length
     let result = null
     if (resultLength == 1) {
-        result = element
+        result = elementList[0]
     }
     return result
 

@@ -34,7 +34,7 @@ exports.click = async function (input) {
                 let y = rect.height * input.y
                 await locator.click({ position: { x: x, y: y }, force: true })
             } catch (error) {
-                return Promise.reject(`Unable to Click Element:${input.element.displayName}    Error: ${error}`)
+                throw new Error(`Unable to Click Element: ${input.element.displayName}`)
             }
             return true
         }

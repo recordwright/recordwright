@@ -23,6 +23,9 @@ class BasePlayWrightFunction {
             if (error.message.includes('test.step() can only')) {
                 result = await this.func(this.input)
             }
+            else {
+                throw error
+            }
         }
         return result
 

@@ -6,8 +6,9 @@ const findElement = require('./findElement')
 /**
  * Click UI Element at against coordaination
  * @param {Object} input
- * @param {Frame} input.frame 
+ * @param {Page} input.page 
  * @param {ElementSelector} input.element
+ * @returns {Frame}
  */
 exports.gotoFrame = async function (input) {
     class mainClass extends RecordwrightFunc {
@@ -21,12 +22,14 @@ exports.gotoFrame = async function (input) {
         async func() {
             try {
                 let element = null
-                element = await findElement(input.frame, input.element)
-
+                element = await findElement(input.page, input.element)
                 let frame = await element.contentFrame()
+                if (frame == null) {
+                    frame = input.page.mainFrame()
+                }
                 return frame
             } catch (error) {
-                return Promise.reject(`Unable to go to frame:${input.element.displayName}    Error: ${error}`)
+                throw new Error(`Unable to go to frame:${input.element.displayName}`)
             }
         }
 

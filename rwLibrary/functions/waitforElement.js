@@ -1,5 +1,5 @@
 
-const { test, Page, Frame } = require('@playwright/test')
+const { test, Page, Frame, ElementHandle } = require('@playwright/test')
 const ElementSelector = require('../class/ElementSelector')
 const RecordwrightFunc = require('../class/RecordwrightFunc')
 const HealingSnapshot = require('../class/HealingSnapshot')
@@ -9,8 +9,9 @@ const findElement = require('./findElement')
  * @param {Object} input
  * @param {Frame} input.frame 
  * @param {ElementSelector} input.element
- * @param {Number} input.timeout Maximum timeout
+ * @param {Number} input.timeout Maximum timeout. Unit ms
  * @param {HealingSnapshot} input.healingSnapshot
+ * @returns {ElementHandle} 
  * 
  */
 exports.waitforElement = async function (input) {
@@ -33,8 +34,9 @@ exports.waitforElement = async function (input) {
                     elapsedTime = Date.now() - startTime
                 }
             } catch (error) {
-                return Promise.reject(`Unable to Click Find :${input.element.displayName}    Error: ${error}`)
+
             }
+            throw new Error(`Unable to Find Element:${input.element.displayName} in ${input.timeout} ms`)
 
 
 

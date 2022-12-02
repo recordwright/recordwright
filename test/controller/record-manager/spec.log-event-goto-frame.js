@@ -133,7 +133,7 @@ describe('Record Manager - stepControl - gotoFrame', () => {
     }).timeout(10000)
     it('should switch back to main page', async () => {
         recordManager.runtimeSetting.ignoredEventList = ['scroll', 'mousedown', 'mouseup']
-        await recordManager.start({ headless: true })
+        await recordManager.start({ headless: false })
         await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
         let iFrameId1 = 'test1'
         await injectIframe({
