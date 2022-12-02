@@ -14,6 +14,7 @@ class CreateNewContextResult {
  * Navigate browser to specific url
  * @param {Object} input
  * @param {Browser} input.browser 
+ * @returns {CreateNewContextResult}
  */
 exports.createNewContext = async function (input) {
     class mainClass extends RecordwrightFunc {
@@ -23,7 +24,7 @@ exports.createNewContext = async function (input) {
         }
         async func() {
             let context = await input.browser.newContext()
-            let page = context.pages()[0]
+            let page = await context.newPage()
             let frame = page.mainFrame()
             let result = new CreateNewContextResult(page, frame)
             return result
