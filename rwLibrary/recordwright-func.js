@@ -5,6 +5,7 @@ const { bringPageToFront } = require('./functions/bringPageToFront')
 const { gotoUrl } = require('./functions/gotoUrl')
 const { createNewContext } = require('./functions/createNewContext')
 const { initialize } = require('./functions/initialize')
+const { change } = require('./functions/change')
 module.exports = {
-    click, gotoFrame, waitforElement, bringPageToFront, gotoUrl, createNewContext, initialize
+    click, gotoFrame, waitforElement, bringPageToFront, gotoUrl, createNewContext, initialize, change
 }
