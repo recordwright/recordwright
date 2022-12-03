@@ -31,6 +31,7 @@ class RecordManager {
     }
     async waitForInit() {
         await this.browserControl.waitForInit()
+        await this.functionControl.store.waitForLoadComplete()
     }
     async start({ headless = false } = {}) {
         await this.browserControl.createBrowserContext({ headless, exposedFunc: this.funcDict })

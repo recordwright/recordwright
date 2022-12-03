@@ -18,6 +18,8 @@ class AST {
         /** @type {Array<FunctionAST>} */
         this.__funcRepo = []
         this.__runtimeVariable = {} //this function is used to store runtime variable
+        /**@type {Object.<string,boolean>} */
+        this._loadStatus = {}
     }
     get runtimeVariable() {
         return this.__runtimeVariable
@@ -82,6 +84,7 @@ class AST {
      * 
      */
     async loadFunctions(funcPath) {
+        this._loadStatus[funcPath] = false
         let jsStr = (await fs.readFile(funcPath)).toString()
         let ast = acorn.parse(jsStr, { ecmaVersion: 2022 })
         //delete cached library and its dependencies
@@ -132,6 +135,23 @@ class AST {
 
         }
         b1.stop();
+        this._loadStatus[funcPath] = true
+    }
+    /**
+     * Keep waiting till all function files are loaded
+     * @returns 
+     */
+    async waitForLoadComplete() {
+        while (true) {
+            let funcPathList = Object.keys(this._loadStatus)
+            let allFuncLoaded = funcPathList.every(item => {
+                return this._loadStatus[item]
+            })
+            if (!allFuncLoaded) {
+                await new Promise(resolve => setTimeout(resolve, 50))
+            }
+            return
+        }
 
     }
 
