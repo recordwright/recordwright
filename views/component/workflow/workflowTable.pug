@@ -1,0 +1,44 @@
+include ../input.pug
+
+//- table mixins
+mixin workflow-table(header,data,removeWorkflowQueryKey,upWorkflowQueryKey,downWorkflowQueryKey,editWorkflowQueryKey,locatorWorkflowQueryKey,updateStepQueryKey)
+    - var type = "table-hover"
+    table.table(class=type)
+        thead
+            tr
+                th="#"
+                each head, i in header
+                    th #{head}
+        tbody
+            each row,j in data
+                tr(id='tr-'+j)
+                    td
+                        input(class='workflow-step-input' value=j index=j querykey=updateStepQueryKey queryindex='from' onChange="redirectInputOnChange(event)")
+                    each col,k in row                        
+                        if col.includes('.png')
+                            td
+                                div(class='container-fluid')
+                                    +img-thumbnail("temp/componentPic/"+col,"UI Element")
+                        else
+                            td #{col}
+                    td
+                        div(data-toggle="tooltip" title="Edit Opearation")
+                            +a-btn-primary('?'+editWorkflowQueryKey+'='+j)
+                                +icon("edit")
+                        //- if 2nd column is a picture, it means it is a locator
+                        if row[1].includes('.png')
+                            div(data-toggle="tooltip" title="Edit Locator")
+                                +a-btn-warning('?'+locatorWorkflowQueryKey+'='+j)
+                                    +icon("screenshot")                                
+                        div(data-toggle="tooltip" title="Move Up Opeartion")
+                            +a-btn-info('?'+upWorkflowQueryKey+'='+j)
+                                +icon("arrow-up")
+                        div(data-toggle="tooltip" title="Delete Opeartion")
+                            +a-btn-danger('?'+removeWorkflowQueryKey+'='+j)
+                                +icon("trash")                  
+                        div(data-toggle="tooltip" title="Move Down Operation")
+                            +a-btn-info('?'+downWorkflowQueryKey+'='+j)
+                                +icon("arrow-down")
+
+
+

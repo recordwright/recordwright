@@ -1,0 +1,16 @@
+//- table mixins
+mixin possible-locator-table(possibleLocatorList,possibleLocatorOkQueryKey)
+    - var type = "table-hover"
+    each locator,i in possibleLocatorList
+        div(class='row')
+            div(class='col-md-1')="No."+i
+            div(class='col-md-2')="Locator Name:"+locator.name
+            div(class='col-md-2')="Selector:"+locator.selector
+            div(class='col-md-10 locator-pic')                
+                +img-thumbnail("temp/componentPic/"+locator.pic,"UI Element")
+            div(class='col-md-1' data-toggle="tooltip" title="Confirm locator matched") 
+                +a-btn-primary('?'+possibleLocatorOkQueryKey+'='+i)                    
+                    +icon("ok")
+
+
+

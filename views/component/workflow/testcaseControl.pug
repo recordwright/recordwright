@@ -1,0 +1,18 @@
+//- table mixins
+include ../input.pug
+mixin testcase-control(btnResolveLocatorQueryKey,btnCreateTestcaseQueryKey,txtTestSuiteQueryKey,textTestSuiteValue,txtTestCaseQueryKey,textTestCaseValue,txtTestcaseStatus,isValidationPass,btnAbortExecution,btnFixScreenshotByRunTC)
+    script(src="/javascript/redirectInput.js")
+    div(class='row')
+        div
+            +input-arguments(txtTestSuiteQueryKey,[{pugType:'input',description:'Test Suite Name',value:textTestSuiteValue}],'index')
+            +input-arguments(txtTestCaseQueryKey,[{pugType:'input',description:'Test Case Name',value:textTestCaseValue}],'index')
+            if isValidationPass
+                +panel-success("PASS")            
+                    p=txtTestcaseStatus 
+            else 
+                +panel-danger("Test Failed!")            
+                    p !{txtTestcaseStatus}
+            +a-btn-primary("?"+btnResolveLocatorQueryKey)="Resolve Pending Issues"
+            +a-btn-info("?"+btnRunWorkflow)="Run Workflow"
+            +a-btn-danger("?"+btnAbortExecution)="Abort Execution"
+            +a-btn("?"+btnFixScreenshotByRunTC)="Navigate Browser to Failure Step"

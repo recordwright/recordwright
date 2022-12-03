@@ -1,0 +1,54 @@
+extends ./component/navigationHeader.pug
+include ./component/input.pug
+include ./component/refresh.pug
+include ./component/resultPanel.pug
+include ./component/checkboxGroup.pug
+include ./component/operation/variableTable.pug
+block content
+
+	script(src="/javascript/redirectInput.js")
+	h1='Blue stone Agent'
+	+input-arguments(txtSelector,[{description:'Selector:',pugType:"input",value:currentSelector}],'index')
+	h2='Picture'
+	+img-responsive("temp/componentPic/"+currentSelectorPic,"Responsive Image")
+
+
+	+dropdown(currentGroup,groups)
+
+	+dropdown(currentOperation,operations)='' 
+
+	+input-arguments(argumentsQueryKey,argumentList,argumentsQueryIndex)='' 
+
+	+result-panel(result.isPass,'Result',result.text)
+
+	if btnAddStepValidation!=null && btnAddStepValidation!=''
+		+alert-danger(btnAddStepValidation)
+
+	+accordion("Recording Setting")
+		+accordion-item-primary("Operation","sample","true")
+			+a-btn-primary('?'+runQueryKey)='Run Step'
+			+a-btn-success('?'+addStepQueryKey)='Add Step'
+			+a-btn-danger('?'+cancelQueryKey)='Resume'
+		+accordion-item-default("Variable Information","sample")
+			+input-arguments(returnQueryKey,returnList,'index')
+			+variable-table(variableInfo)
+		+accordion-item-default("Recording Settings","sample")
+			div(class="container-fluid")
+				h4="Start/Stop Recording"
+				if isRecording
+					+a-btn-danger('?'+isRecordingQueryKey)='Stop Recording'
+				else 
+					+a-btn-success('?'+isRecordingQueryKey)='Start Recording'
+			div(class="container-fluid")
+				h4="Start/Stop HTML Capture"
+				if isRecordingHtml
+					+a-btn-danger('?'+isRecordingHtmlQueryKey)='Stop HTML Capture'
+				else 
+					+a-btn-success('?'+isRecordingHtmlQueryKey)='Start HTML Capture'
+
+			div(class="container-fluid")
+				h4="Operation Capture Setting: Grey-Capture; White-Not Capture"
+				+customized-checkbox-toggle(functionMuteStatus,getFunctionMuteStatQueryKey)
+
+
+
