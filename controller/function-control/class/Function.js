@@ -32,8 +32,31 @@ class FunctionAST {
         this.params = params
         this.mainFunc = mainFunc
         this.returnJsDoc = returnJsDoc
+        /**@type {Object.<string,string>[]} */
+        this.defaultGUITag = this.getDefaultGUITag(name)
     }
-
+    static GUI_CATEGORY = {
+        Verify: 'Verify',
+        InBuiltFunction: 'Run In-built Operation',
+        CustomizedOperations: 'Run Customzied Function'
+    }
+    getDefaultGUITag(name) {
+        let defaultTagDict = {
+            waitforElement: FunctionAST.GUI_CATEGORY.Verify,
+            click: FunctionAST.GUI_CATEGORY.InBuiltFunction,
+            gotoFrame: FunctionAST.GUI_CATEGORY.InBuiltFunction,
+            waitforElement: FunctionAST.GUI_CATEGORY.InBuiltFunction,
+            bringPageToFront: FunctionAST.GUI_CATEGORY.InBuiltFunction,
+            gotoUrl: FunctionAST.GUI_CATEGORY.InBuiltFunction,
+            createNewContext: FunctionAST.GUI_CATEGORY.InBuiltFunction,
+            change: FunctionAST.GUI_CATEGORY.InBuiltFunction
+        }
+        let tagInfo = defaultTagDict[name]
+        if (tagInfo == null) {
+            tagInfo = FunctionAST.GUI_CATEGORY.CustomizedOperations
+        }
+        return tagInfo
+    }
     /**
      * Generate argument string based on the params
      * @param {import('puppeteer-core').Browser} browser 
