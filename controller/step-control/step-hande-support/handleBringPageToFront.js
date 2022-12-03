@@ -25,7 +25,10 @@ function handleBringPageToFront(stepList, step, functionControl) {
     let bringPageToFrontStep = RecordingStep.restore(step, functionAst, 'bringPageToFront')
 
     //update parameters
-    bringPageToFrontStep.functionAst.params[2]['value'] = contextIndex
+
+    bringPageToFrontStep.functionAst.params[1]['value'] = contextIndex
+
+
 
     //remove iframe as default iframe for bringPageToFront is empty
     bringPageToFrontStep.iframe = ''

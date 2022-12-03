@@ -56,7 +56,7 @@ describe('Record Manager - logEvent- Switch Context', () => {
         assert.deepEqual(bringPageToFrontSteps.length, 2, '2 bring page to front context exists because we launch 2 browsers')
         for (let i = 0; i < bringPageToFrontSteps.length; i++) {
             let step = bringPageToFrontSteps[i]
-            assert.deepEqual(step.parameter[2].value, i, 'the context index should be set accordingly')
+            assert.deepEqual(step.parameter[1].value, i, 'the context index should be set accordingly')
         }
 
     }).timeout(1000000)

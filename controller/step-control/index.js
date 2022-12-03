@@ -3,6 +3,7 @@ let FunctionControl = require('../function-control')
 const handleBringPageToFront = require('./step-hande-support/handleBringPageToFront')
 const handleWaitForElement = require('./step-hande-support/handleWaitForElement')
 const handleGotoFrame = require('./step-hande-support/handleGotoFrame')
+const handleUnimplementedFunc = require('./step-hande-support/handleUnimplementedFunc')
 class StepControl {
     /**
      * 
@@ -29,7 +30,8 @@ class StepControl {
             this.lastStepTimeStamp = Date.now()
             this._rawStepRepo.push(step)
             this.steps = handleBringPageToFront(this.steps, step, this.funcControl)
-            this.step = handleGotoFrame(this.steps, step, this.funcControl, handleWaitForElement)
+            this.steps = handleUnimplementedFunc(this.steps, step)
+            this.steps = handleGotoFrame(this.steps, step, this.funcControl, handleWaitForElement)
             this.steps = handleWaitForElement(this.steps, step, this.funcControl)
             this.steps.push(step)
         } catch (error) {
