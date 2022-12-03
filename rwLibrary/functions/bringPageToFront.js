@@ -18,14 +18,13 @@ class BringContextToFrontResult {
  * Bring browser context to front
  * @param {Object} input
  * @param {Browser} input.browser 
- * @param {ElementSelector} input.element
  * @param {Number} input.index Index of browser. Start from 0
  * @returns {BringContextToFrontResult}
  */
 exports.bringPageToFront = async function (input) {
     class mainClass extends RecordwrightFunc {
         async getLog() {
-            return `Click in ${input.element.displayName}`
+            return `Bring Page to front. Index: ${input.index}`
         }
         /**
          * Perform functions
@@ -38,10 +37,12 @@ exports.bringPageToFront = async function (input) {
                  */
                 let contextList = input.browser.contexts()
                 let context = contextList[input.index]
+                let page = context.pages()[0]
+                await page.bringToFront()
                 let result = new BringContextToFrontResult(context)
                 return result
             } catch (error) {
-                return Promise.reject(`Unable to Click Element:${input.element.displayName}    Error: ${error}`)
+                return Promise.reject(`Unable to Bring Page into view. Index:${input.index}    Error: ${error}`)
             }
         }
 
