@@ -267,7 +267,7 @@ export class PotentialMatchManager {
     setActiveLocator() {
         let activeLocatorIndexes = []
         this.currentPotentialMatchList.forEach(item => {
-            activeLocatorIndexes.concat(item.potentialMatch)
+            activeLocatorIndexes = activeLocatorIndexes.concat(item.potentialMatch)
         })
         window.setActiveLocator(activeLocatorIndexes)
 

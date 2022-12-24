@@ -2,6 +2,8 @@
 const { test, Page, Frame } = require('@playwright/test')
 const ElementSelector = require('../../../rwLibrary/class/ElementSelector')
 const RecordwrightFunc = require('../../../rwLibrary/class/RecordwrightFunc')
+const LocatorControl = require('../../../controller/locator-control')
+const locator = require('../recordwright-locator')
 /**
  * Click UI Element at against coordaination
  * @param {Object} input
@@ -12,8 +14,14 @@ const RecordwrightFunc = require('../../../rwLibrary/class/RecordwrightFunc')
  */
 exports.click1 = async function (input) {
     class mainClass extends RecordwrightFunc {
-        async isVisible() {
-            return true
+        /**
+         * Make current function visible when specified condition is met
+         * @param {object} input
+         * @param {LocatorControl} input.locatorControl
+         * @returns {boolean}
+         */
+        async isVisible(input) {
+            return input.locatorControl.getIsLocatorActive(locator['input'])
         }
         async getLog() {
             return `Click in ${input.element.displayName}`

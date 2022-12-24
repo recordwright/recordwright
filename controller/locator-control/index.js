@@ -36,6 +36,20 @@ class LocatorManager {
         this.__locatorLibrary = locatorLibrary
     }
 
+
+    /**
+     * Get if current locator is active
+     * @param {Locator} locator 
+     * @returns {boolean}
+     */
+    getIsLocatorActive(locator) {
+        let locatorFound = this.locatorLibrary.find(item => item.path == locator.displayName && this.locatorLibrary[0].selector)
+        if (locatorFound == null)
+            return false
+        else
+            return true
+    }
+
     /**
      * Reset Locator's activation status and mark specific index to be active
      * @param {Array<number>} locatorIndexList 

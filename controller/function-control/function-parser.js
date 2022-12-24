@@ -84,58 +84,62 @@ class AST {
      * 
      */
     async loadFunctions(funcPath) {
-        this._loadStatus[funcPath] = false
-        let jsStr = (await fs.readFile(funcPath)).toString()
-        let ast = acorn.parse(jsStr, { ecmaVersion: 2022 })
-        //delete cached library and its dependencies
-        if (require.cache[funcPath]) {
-            require.cache[funcPath].children.forEach(item => {
-                delete require.cache[item.id]
+        try {
+            this._loadStatus[funcPath] = false
+            let jsStr = (await fs.readFile(funcPath)).toString()
+            let ast = acorn.parse(jsStr, { ecmaVersion: 2022 })
+            //delete cached library and its dependencies
+            if (require.cache[funcPath]) {
+                require.cache[funcPath].children.forEach(item => {
+                    delete require.cache[item.id]
+                })
+            }
+
+            delete require.cache[funcPath]
+            let bsFunction = require(funcPath)
+            let functionKeys = Object.keys(bsFunction)
+
+            let requireInfo = await this.__getRequireInfo(ast, funcPath)
+
+            const b1 = new cliProgress.SingleBar({
+                format: 'Loading ' + funcPath + ' [{bar}] {percentage}% | {value}/{total}'
+            }, cliProgress.Presets.shades_classic);
+
+            b1.start(functionKeys.length, 0, {
+                speed: "N/A"
             })
+            let funcStaicInfoList = await this.__getRwFuncInfoList(funcPath, ast, functionKeys)
+
+            for (let i = 0; i < functionKeys.length; i++) {
+                b1.increment()
+                let funcName = functionKeys[i]
+                //Import recordwright-func.js and get current function name and locator
+                let mainFunc = bsFunction[funcName]
+
+
+
+
+
+                //extract static function info for current call
+                let funcStaicInfo = funcStaicInfoList[i]
+                //Based on the static library and method name, correlate dynamic info
+                let methodDetail = requireInfo.repo.find(info => {
+                    return info.methodName == funcStaicInfo.methodName
+                })
+
+
+
+                let functionAst = new FunctionAST(funcPath, funcName, methodDetail.methodDescription, methodDetail.jsDocTag, mainFunc, methodDetail.returnJsDoc)
+                this.__addFuncAstToRepo(functionAst)
+
+
+
+            }
+            b1.stop();
+            this._loadStatus[funcPath] = true
+        } catch (error) {
+            console.log()
         }
-
-        delete require.cache[funcPath]
-        let bsFunction = require(funcPath)
-        let functionKeys = Object.keys(bsFunction)
-
-        let requireInfo = await this.__getRequireInfo(ast, funcPath)
-
-        const b1 = new cliProgress.SingleBar({
-            format: 'Loading ' + funcPath + ' [{bar}] {percentage}% | {value}/{total}'
-        }, cliProgress.Presets.shades_classic);
-
-        b1.start(functionKeys.length, 0, {
-            speed: "N/A"
-        })
-        let funcStaicInfoList = await this.__getRwFuncInfoList(funcPath, ast, functionKeys)
-
-        for (let i = 0; i < functionKeys.length; i++) {
-            b1.increment()
-            let funcName = functionKeys[i]
-            //Import recordwright-func.js and get current function name and locator
-            let mainFunc = bsFunction[funcName]
-
-
-
-
-
-            //extract static function info for current call
-            let funcStaicInfo = funcStaicInfoList[i]
-            //Based on the static library and method name, correlate dynamic info
-            let methodDetail = requireInfo.repo.find(info => {
-                return info.methodName == funcStaicInfo.methodName
-            })
-
-
-
-            let functionAst = new FunctionAST(funcPath, funcName, methodDetail.methodDescription, methodDetail.jsDocTag, mainFunc, methodDetail.returnJsDoc)
-            this.__addFuncAstToRepo(functionAst)
-
-
-
-        }
-        b1.stop();
-        this._loadStatus[funcPath] = true
     }
     /**
      * Keep waiting till all function files are loaded
@@ -144,11 +148,16 @@ class AST {
     async waitForLoadComplete() {
         while (true) {
             let funcPathList = Object.keys(this._loadStatus)
+            if (funcPathList.length < 2) {
+                continue
+            }
+
             let allFuncLoaded = funcPathList.every(item => {
                 return this._loadStatus[item]
             })
             if (!allFuncLoaded) {
                 await new Promise(resolve => setTimeout(resolve, 50))
+                continue
             }
             return
         }

@@ -1,11 +1,13 @@
 const { test, Frame } = require('@playwright/test')
+const LocatorControl = require('../../controller/locator-control')
 class BasePlayWrightFunction {
     /**
      * Make current function visible when specified condition is met
-     * @param {Frame}
+     * @param {object} input
+     * @param {LocatorControl} input.locatorControl
      * @returns {boolean}
      */
-    async isVisible(frame) {
+    async isVisible(input) {
         return true
     }
     async func() {
@@ -50,7 +52,12 @@ class BasePlayWrightFunction {
         let classVar = new className()
 
         //otherwise, just run function associated with this class
-        let result = await classVar.run()
+        let result = false
+        if (input.runGetVisiabilityFunc == true) {
+            result = await classVar.isVisible(input)
+        }
+        else
+            result = await classVar.run()
         return result
 
     }

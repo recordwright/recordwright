@@ -5,6 +5,7 @@ const StepControl = require('../step-control/index')
 const RuntimeSetting = require('./class/record-runtime-setting')
 const RecordingStep = require('../step-control/class/recording-step.js')
 const FunctionControl = require('../function-control/index')
+const Operation = require('../operation/index')
 class RecordManager {
     constructor({
         io,
@@ -28,10 +29,13 @@ class RecordManager {
         this.browserControl = new BrowserControl(config.recordwright.use, io, exposedFunc)
 
         this.funcDict = this._initExposedFuncDict()
+
+        this.operation = new Operation(this.functionControl, this.locatorControl, this.browserControl, this.stepControl)
     }
     async waitForInit() {
         await this.browserControl.waitForInit()
         await this.functionControl.store.waitForLoadComplete()
+        this.operation.updateFunctionCategory()
     }
     async start({ headless = false } = {}) {
         await this.browserControl.createBrowserContext({ headless, exposedFunc: this.funcDict })
@@ -145,7 +149,8 @@ class RecordManager {
                 context.runtimeSetting.stopRecordingWithGracePeriod()
             }
 
-
+            //scan active function
+            await context.operation.updateActiveFunctionList()
 
             let recordingStep = context.convertEventDetailToRecordingStep(eventDetail, context.stepControl.hoveredElement.target, context.stepControl.lastStepTimeStamp)
             //if event command is null, call the in-browser console

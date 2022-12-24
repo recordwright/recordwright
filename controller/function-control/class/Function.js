@@ -45,7 +45,6 @@ class FunctionAST {
             waitforElement: FunctionAST.GUI_CATEGORY.Verify,
             click: FunctionAST.GUI_CATEGORY.InBuiltFunction,
             gotoFrame: FunctionAST.GUI_CATEGORY.InBuiltFunction,
-            waitforElement: FunctionAST.GUI_CATEGORY.InBuiltFunction,
             bringPageToFront: FunctionAST.GUI_CATEGORY.InBuiltFunction,
             gotoUrl: FunctionAST.GUI_CATEGORY.InBuiltFunction,
             createNewContext: FunctionAST.GUI_CATEGORY.InBuiltFunction,
