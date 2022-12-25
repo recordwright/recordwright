@@ -10,8 +10,6 @@ let config = {
             headless: false,
             launchOptions: {
                 args: [
-                    '--disable-web-security',
-                    '--disable-features=IsolateOrigins,site-per-process',
                 ]
             }
         }
@@ -57,6 +55,13 @@ function configFunc() {
     if (projectObj.config) {
         let recordwrightConfigPath = path.join(projectFolder, projectObj.config)
         config.recordwright = require(recordwrightConfigPath).projects[0]
+
+        //inject recordwright related flags for arguments
+        config.recordwright.use.launchOptions.args = config.recordwright.use.launchOptions.args.concat([
+            '--disable-web-security',
+            '--disable-features=IsolateOrigins,site-per-process',
+            '--disable-site-isolation-trials',
+        ])
         //force headless mode to be false because bluestone need to display browser
     }
 

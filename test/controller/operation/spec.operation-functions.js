@@ -3,7 +3,9 @@ const RecordWrightBackend = require('../../support/recordwright-backend')
 const assert = require('assert')
 const path = require('path')
 const locator = require('./support/Locator')
+const { injectIframe } = require('../record-manager/support')
 const { callInBrowserSpy } = require('../record-manager/support')
+// const { chromium } = require('playwright')
 describe('Operation tab', async () => {
     let recordwrightBackend = new RecordWrightBackend()
     let funcPath = path.join(__dirname, '../../sample-project/recordwright-func.js')
@@ -60,6 +62,25 @@ describe('Operation tab', async () => {
 
     }).timeout(5000)
     it('should return active custom function in frame scenario', async () => {
-        //record wright should only return active locator once from whole page to avoid overriden from multiple frame
-    })
+        //record wright should only return active locator from main frameto avoid overriden from multiple frame
+        recordManager.runtimeSetting.ignoredEventList = ['scroll', 'mousedown', 'mouseup']
+        await recordManager.start({ headless: false })
+        await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
+        await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
+
+        let todoMvcLink = 'https://todomvc.com/'
+        let EvanYouWebsiteLink = 'https://evanyou.me/'
+
+
+        await injectIframe({
+            page: recordManager.browserControl.activePage,
+            iframeId: locator['test frame 1'].locator.replace('#', ''),
+            url: EvanYouWebsiteLink
+        })
+        // await new Promise(resolve => setTimeout(resolve, 500000))
+
+        console.log()
+
+    }).timeout(999999999)
+
 })
