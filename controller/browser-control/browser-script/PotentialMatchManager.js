@@ -91,7 +91,14 @@ export class PotentialMatchManager {
         this.lastLocatorScanTime = Date.now()
         this.bluestoneRegisteredLocator = []
         this.waitTime = 1000
-
+        /**
+         * This is used to aggregate all potential match from multiple frames
+         * This is served as a single source of the truth
+         * For elements in the main frame, it will aggregate all locator potential match information from subframes 
+         * For those eventRecorder in the child frame, it will be empty
+         * @type {Object.<string,LocatorEntry[]>} 
+         * */
+        this.masterPotentialMatch = {}
     }
 
     /**
@@ -254,6 +261,9 @@ export class PotentialMatchManager {
         }
 
     }
+    /**
+     * Update currentPotential Match List. In addition to that, save frame-specific locator inforamtion in the main frame as single source of the truth
+     */
     applyChange() {
 
 
@@ -262,13 +272,41 @@ export class PotentialMatchManager {
         this.proposedPotentialMatchList = []
 
 
+        //if we are at main frame already, then we just need to updat ourself
+        let frameIndex = 'root'
+        let currentFrame = window.frameElement
+        if (currentFrame == null) {
+            this.masterPotentialMatch[frameIndex] = this.currentPotentialMatchList
+            return
+        }
+
+        // we are at parent frame. we will figure out our frameIndex and update information to the main frame
+        //current version assume that we are not going to have nested frame
+        let iFrameList = [...window.top.document.getElementsByTagName('iFrame')] //get all iframes in the main frame
+        frameIndex = iFrameList.findIndex(item => item == currentFrame)
+        /**
+         * @type {import('./event-recorder').BrowserEventRecorder}
+         */
+        let rootEventRecorder = window.top.eventRecorder
+        rootEventRecorder.potentialMatchManager.masterPotentialMatch[frameIndex] = this.currentPotentialMatchList
+
+
     }
     //based on the locator scan result, report active locators back the recordwright locator manager
     setActiveLocator() {
         let activeLocatorIndexes = []
-        this.currentPotentialMatchList.forEach(item => {
-            activeLocatorIndexes = activeLocatorIndexes.concat(item.potentialMatch)
-        })
+        /**@type {import('./event-recorder').BrowserEventRecorder} */
+        let currentEventRecorder = window.eventRecorder
+        if (window.frameElement != null) {
+            currentEventRecorder = window.top.eventRecorder
+        }
+
+        let framekeys = Object.keys(currentEventRecorder.potentialMatchManager.masterPotentialMatch)
+        for (let key of framekeys) {
+            currentEventRecorder.potentialMatchManager.masterPotentialMatch[key].forEach(item => {
+                activeLocatorIndexes = activeLocatorIndexes.concat(item.potentialMatch)
+            })
+        }
         window.setActiveLocator(activeLocatorIndexes)
 
     }

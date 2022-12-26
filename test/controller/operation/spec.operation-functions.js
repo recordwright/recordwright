@@ -65,19 +65,28 @@ describe('Operation tab', async () => {
         //record wright should only return active locator from main frameto avoid overriden from multiple frame
         recordManager.runtimeSetting.ignoredEventList = ['scroll', 'mousedown', 'mouseup']
         await recordManager.start({ headless: false })
-        await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
-        await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
 
-        let todoMvcLink = 'https://todomvc.com/'
+        let todoMvcLink = 'https://todomvc.com/examples/vue/'
         let EvanYouWebsiteLink = 'https://evanyou.me/'
+
+        await recordManager.browserControl.activePage.goto(EvanYouWebsiteLink)
 
 
         await injectIframe({
             page: recordManager.browserControl.activePage,
             iframeId: locator['test frame 1'].locator.replace('#', ''),
-            url: EvanYouWebsiteLink
+            url: todoMvcLink
         })
-        // await new Promise(resolve => setTimeout(resolve, 500000))
+        await new Promise(resolve => setTimeout(resolve, 100))
+        await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
+        //confirm masterPotentialMatchList is populated correctly in the main frame
+        let html = await recordManager.browserControl.activePage.locator('//html')
+        await callInBrowserSpy(html)
+        await new Promise(resolve => setTimeout(resolve, 50))
+        let activeFunc = recordManager.operation.activeFunctionList.find(item => item.name == 'click1')
+        assert.notEqual(activeFunc, null, 'function "click1" should be visible when item is there')
+
+
 
         console.log()
 

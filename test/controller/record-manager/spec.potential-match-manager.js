@@ -1,7 +1,9 @@
 const RecordManager = require('../../../controller/record-manager')
 const RecordWrightBackend = require('../../support/recordwright-backend')
+const { injectIframe } = require('../record-manager/support')
 const assert = require('assert')
 const Locator = require('./files/locator')
+const locatorMasterPotentialMatch = require('./files/locator1')
 const path = require('path')
 describe('Potential Match Manager', () => {
     let locatorPath = path.join(__dirname, './files/locator.js')
@@ -84,4 +86,33 @@ describe('Potential Match Manager', () => {
         })
         assert.equal(backgroundColor, 'rgba(0, 223, 145, 0.45)')
     }).timeout(20000)
+
+    it('should log active locators in masterPotentialMatch from main frame', async () => {
+        //record wright should only return active locator from main frameto avoid overriden from multiple frame
+        recordManager.runtimeSetting.ignoredEventList = ['scroll', 'mousedown', 'mouseup']
+        await recordManager.start({ headless: true })
+        await recordManager.browserControl.activePage.goto('https://todomvc.com/examples/vue/')
+
+
+        let todoMvcLink = 'https://todomvc.com/'
+        let EvanYouWebsiteLink = 'https://evanyou.me/'
+
+
+        await injectIframe({
+            page: recordManager.browserControl.activePage,
+            iframeId: locatorMasterPotentialMatch['test frame 1'].locator.replace('#', ''),
+            url: EvanYouWebsiteLink
+        })
+        await new Promise(resolve => setTimeout(resolve, 100))
+        await recordManager.browserControl.__waitForPotentialMatchManagerPopoulated()
+        //confirm masterPotentialMatchList is populated correctly in the main frame
+        let masterPotentialMatch = await recordManager.browserControl.activePage.evaluate(item => {
+            return eventRecorder.potentialMatchManager.masterPotentialMatch
+        })
+        let frameKeys = Object.keys(masterPotentialMatch)
+        assert.deepEqual(frameKeys.length, 2, 'There expect to be exact 2 frames')
+        assert.deepEqual(masterPotentialMatch['root'].length, 5, '5 potential match in the main frames')
+        assert.deepEqual(masterPotentialMatch['0'].length, 2, '2 potential match in the evan you frame')
+
+    }).timeout(5000)
 })
