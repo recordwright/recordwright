@@ -64,7 +64,7 @@ describe('Operation tab', async () => {
     it('should return active custom function in frame scenario', async () => {
         //record wright should only return active locator from main frameto avoid overriden from multiple frame
         recordManager.runtimeSetting.ignoredEventList = ['scroll', 'mousedown', 'mouseup']
-        await recordManager.start({ headless: false })
+        await recordManager.start({ headless: true })
 
         let todoMvcLink = 'https://todomvc.com/examples/vue/'
         let EvanYouWebsiteLink = 'https://evanyou.me/'
@@ -90,6 +90,6 @@ describe('Operation tab', async () => {
 
         console.log()
 
-    }).timeout(999999999)
+    }).timeout(5000)
 
 })
